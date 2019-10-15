@@ -34,21 +34,30 @@ const Loading = styled.div`
     user-select: none;
 `
 
+function getCookie(name) {
+    var matches = document.cookie.match(new RegExp(
+      "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+  }
+
 const Base = props => {
-    const [loading, setLoading] = useState(false);
+    const [userState, setUserState] = useState(0);
+    
     useEffect(() => {
-        setTimeout(() => {
-            setLoading(true);
-        }, 100)
+        const accessToken = getCookie('accessToken');
+        axios.get(`${process.env.BACK}/api/getUser/${accessToken}`).then(data => {
+            setUserState(data.data)
+        })
     }, [])
     return (
         <BaseLayout>
             <ContentBlock>
-                { loading ? (
+                { userState !== 0 ? (
                     <>
-                        <Button user={ props.user.user_link } text={ props.user.display_name  ? ('Добавить бота для канала') : 'Войти с помощью Twitch' } type={ props.user.display_name ? 1 : 2 } />
-                        { props.user.display_name ? ( <Button text="Инструкция" type={4} /> ) : ''}
-                        { props.user.display_name ? ( <Button text="Выйти" type={3} /> ) : ''}
+                        <Button user={ userState.user_link } text={ userState.display_name  ? ('Добавить бота для канала') : 'Войти с помощью Twitch' } type={ userState.display_name ? 1 : 2 } />
+                        { userState.display_name ? ( <Button text="Инструкция" type={4} /> ) : ''}
+                        { userState.display_name ? ( <Button text="Выйти" type={3} /> ) : ''}
                     </>
                 ) : (
                     <Loading>
