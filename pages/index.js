@@ -1,26 +1,32 @@
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import cookies from 'next-cookies'
 
 import Base from '../layouts/Base';
 
+function getCookie(name) {
+    var matches = document.cookie.match(new RegExp(
+      "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+  }
+
 const Index = props => {
+
+    const [userState, setUserState] = useState(0);
+    
+    useEffect(() => {
+        const accessToken = getCookie('accessToken');
+        axios.get(`http://localhost:8080/api/getUser/${accessToken}`).then(data => {
+            setUserState(data.data)
+        })
+    }, [])
+
     return (
-        <Base user={ props.user }>
+        <Base user={ userState }>
             
         </Base>
     )
-}
-
-Index.getInitialProps = function(context) {
-    const { _user } = context.query;
-    const accessToken = cookies(context)['accessToken'];
-
-    return axios.get(`${process.env.BACK}/api/getUser/${accessToken}`).then(data => {
-        return {
-            ...this.props,
-            user: data.data
-        }
-    })
 }
 
 export default Index;
