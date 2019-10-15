@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 
 const ButtonBlock = styled.div`
-    @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
     display: flex;
     justify-content: center;
     flex-direction: column;

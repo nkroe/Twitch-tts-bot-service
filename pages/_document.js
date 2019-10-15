@@ -4,6 +4,7 @@ import { ServerStyleSheet } from 'styled-components';
 
 const globalStyle = {
     __html: `
+    @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
     * {
         margin: 0;
         padding: 0;
