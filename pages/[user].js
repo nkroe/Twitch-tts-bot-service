@@ -48,7 +48,7 @@ const User = () => {
             }
         })
 
-        const socket = io(process.env.BACK);
+        const socket = io(process.env.BACK, { secure: true });
 
         socket.on('play', (data) => {
             const { user_link, text } = data;

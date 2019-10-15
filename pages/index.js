@@ -12,12 +12,11 @@ function getCookie(name) {
   }
 
 const Index = props => {
-
     const [userState, setUserState] = useState(0);
     
     useEffect(() => {
         const accessToken = getCookie('accessToken');
-        axios.get(`http://localhost:8080/api/getUser/${accessToken}`).then(data => {
+        axios.get(`${process.env.BACK}/api/getUser/${accessToken}`).then(data => {
             setUserState(data.data)
         })
     }, [])
