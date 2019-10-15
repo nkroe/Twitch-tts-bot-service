@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "node server/src/server.js",
     "build": "next build",
-    "start": "NODE_ENV=production node server/src/server.js",
+    "start": "node server/src/server.js",
     "export": "next export",
-    "prod": "NODE_ENV=production node server/src/server.js"
+    "prod": "node server/src/server.js"
   },
   "keywords": [],
   "author": "",
