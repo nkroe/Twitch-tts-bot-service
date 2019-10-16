@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
+import getConfig from 'next/config';
 import cookies from 'next-cookies';
 import axios from 'axios';
 import styled from 'styled-components';
 
 import Button from '../components/Button/Button';
+
+const { publicRuntimeConfig } = getConfig()
 
 const BaseLayout = styled.div`
     display: flex;
@@ -46,7 +49,7 @@ const Base = props => {
     
     useEffect(() => {
         const accessToken = getCookie('accessToken');
-        axios.get(`${process.env.BACK}/api/getUser/${accessToken}`).then(data => {
+        axios.get(`${publicRuntimeConfig.BACK}/api/getUser/${accessToken}`).then(data => {
             setUserState(data.data)
         })
     }, [])

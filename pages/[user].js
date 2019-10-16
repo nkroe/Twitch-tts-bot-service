@@ -1,7 +1,9 @@
 import io from 'socket.io-client';
 import { useEffect } from 'react';
 import { route } from 'next/dist/next-server/server/router';
+import getConfig from 'next/config';
 
+const { publicRuntimeConfig } = getConfig()
 const voice = ['ru-RU-Wavenet-A', 'ru-RU-Wavenet-B', 'ru-RU-Wavenet-C', 'ru-RU-Wavenet-D'];
 const ttsApi = 'https://api.streamelements.com/kappa/v2/speech';
 
@@ -48,9 +50,9 @@ const User = () => {
             }
         })
 
-        console.log('Client env: ' + process.env.BACK)
+        console.log('Client env: ' + publicRuntimeConfig.BACK)
 
-        const socket = io(process.env.BACK);
+        const socket = io(publicRuntimeConfig.BACK);
 
         socket.on('play', (data) => {
             const { user_link, text } = data;
