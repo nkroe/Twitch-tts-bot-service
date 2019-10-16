@@ -24,6 +24,7 @@ const TWITCH_SECRET = process.env.TWITCH_SECRET;
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const CALLBACK_URL = `${process.env.BACK}/api/auth/twitch/callback`;
 const MONGO = process.env.MONGO;
+const PORT = process.env.PORT || 8080;
 
 let acc = '';
 let ref = '';
@@ -184,7 +185,7 @@ app.prepare().then(() => {
         return handle(req, res)
     })
 
-    const _server = server.listen(8080, (err) => {
+    const _server = server.listen(PORT, (err) => {
         if (err) throw err
         console.log('Server is started :)')
     })

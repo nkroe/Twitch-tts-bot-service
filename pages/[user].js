@@ -48,6 +48,8 @@ const User = () => {
             }
         })
 
+        console.log('Client env: ' + process.env.BACK)
+
         const socket = io(process.env.BACK);
 
         socket.on('play', (data) => {

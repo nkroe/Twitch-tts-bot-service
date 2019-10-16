@@ -77,7 +77,7 @@ function getClient(client_channel) {
 
             if (self) return;
             const isPrem = () => ((context.badges && (context.badges.moderator || context.badges.broadcaster)) || (context.username === 'fake_fake_fake_'));
-            const isSub = () => ((type === '2') && (context.badges && (context.badges.subscriber || context.badges.vip)));
+            const isSub = () => ((type === '2') && (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip)));
             const isVip = () => ((type === '3') && (context.badges && context.badges.vip));
             let user = users.find(w => w.name === context.username);
             if (/^!fake /gi.test(msg)) {
@@ -90,8 +90,8 @@ function getClient(client_channel) {
                 } else {
                     if (
                         (muteUsers.map(w => w.name.toLowerCase()).includes(context.username)) ||
-                        (/пид|ниг|pid|nig|🇳🇪|π/.test([...text].filter(w => /([a-zA-Zа-яА-Я0-9])/gi.test(w)).join('')) || text.length > (context.badges && (context.badges.subscriber || context.badges.vip) ? 250 : 150)) ||
-                        (user && ((Date.now() / 1000 - user.time / 1000) < (context.badges && (context.badges.subscriber || context.badges.vip) ? 15 : 30)))
+                        (/пид|ниг|pid|nig|🇳🇪|π/.test([...text].filter(w => /([a-zA-Zа-яА-Я0-9])/gi.test(w)).join('')) || text.length > (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip) ? 250 : 150)) ||
+                        (user && ((Date.now() / 1000 - user.time / 1000) < (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip) ? 15 : 30)))
                     ) return;
                     if (isSub()) {
                         updateUsers(user)

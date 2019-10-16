@@ -3,7 +3,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const { Schema } = require('mongoose');
 const MONGO = process.env.MONGO;
-
+console.log('Server env: ' + MONGO)
 mongoose.connect(MONGO, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const User = new Schema(
