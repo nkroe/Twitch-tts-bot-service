@@ -50,8 +50,6 @@ const User = () => {
             }
         })
 
-        console.log('Client env: ' + publicRuntimeConfig.BACK)
-
         const socket = io(publicRuntimeConfig.BACK);
 
         socket.on('play', (data) => {
