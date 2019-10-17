@@ -245,15 +245,15 @@ app.prepare().then(() => {
     event.on('getInfo', (data) => {
         Users.find({ login: data }).then(_data => {
             if (_data.length) {
-                let _users =_data[0].users.filter(w => w.time > Date.now() / 1000);
+                let _users =_data[0].muteUsers.filter(w => w.time > Date.now() / 1000);
                 Users.updateOne({
                     login: data
                 }, {
                     $set: {
-                        "users": _users
+                        "muteUsers": _users
                     }
                 }).then(() => '')
-                event.emit('getInfoRes', { chan: data, users: _users, muteUsers: _data[0].muteUsers, type: _data[0].type })
+                event.emit('getInfoRes', { chan: data, users: _data[0].users, muteUsers: _users, type: _data[0].type })
             }
         })
     })
