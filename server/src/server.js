@@ -246,13 +246,17 @@ app.prepare().then(() => {
         Users.find({ login: data }).then(_data => {
             if (_data.length) {
                 let _users = _data[0].muteUsers.filter(w => w.time > (Date.now() / 1000));
-                Users.updateOne({
-                    login: data
-                }, {
-                    $set: {
-                        "muteUsers": _users
-                    }
-                }).then(() => '');
+                // if (_data[0].muteUsers.filter((w,e) => (_users[e] && (w.name === _users[e].name))).length !== _users.length) {
+                    setTimeout(() => {
+                        Users.updateOne({
+                            login: data
+                        }, {
+                            $set: {
+                                "muteUsers": _users
+                            }
+                        }).then(() => '');
+                    }, 5000)
+                // }
                 event.emit('getInfoRes', { chan: data, users: _data[0].users, muteUsers: _users, type: _data[0].type })
             }
         })
