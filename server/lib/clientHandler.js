@@ -122,12 +122,14 @@ function getClient(client_channel) {
                 console.log(`На канале ${target.slice(1)} был заблокирован пользователь ${user} на ${time} мин.`);
                 client.say(target, `@${context.username} для пользователя @${user} голосовой бот не доступен ${time} мин.`);
             } else if (/^!fakeunmute ([a-zA-Z0-9_])+$/gi.test(msg.trim()) && !muteUsers.includes(context.username) && isPrem()) {
-                event.emit('unmute', {
-                    channel: target.slice(1),
-                    name: msg.split(' ')[1]
-                });
-                console.log(`На канале ${target.slice(1)} был разблокирован пользователь ${msg.split(' ')[1]}`);
-                client.say(target, `@${context.username} для пользователя @${msg.split(' ')[1]} голосовой бот снова доступен`);
+                if (msg.split(' ')[1]){
+                    event.emit('unmute', {
+                        channel: target.slice(1),
+                        name: msg.split(' ')[1].toLowerCase()
+                    });
+                    console.log(`На канале ${target.slice(1)} был разблокирован пользователь ${msg.split(' ')[1]}`);
+                    client.say(target, `@${context.username} для пользователя @${msg.split(' ')[1]} голосовой бот снова доступен`);
+                }
             }
         })
     };

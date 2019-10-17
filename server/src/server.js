@@ -245,7 +245,15 @@ app.prepare().then(() => {
     event.on('getInfo', (data) => {
         Users.find({ login: data }).then(_data => {
             if (_data.length) {
-                event.emit('getInfoRes', { chan: data, users: _data[0].users.filter(w => w.time > Date.now() / 1000), muteUsers: _data[0].muteUsers, type: _data[0].type })
+                let _users =_data[0].users.filter(w => w.time > Date.now() / 1000);
+                Users.updateOne({
+                    login: data
+                }, {
+                    $set: {
+                        "users": _users
+                    }
+                }).then(() => '')
+                event.emit('getInfoRes', { chan: data, users: _users, muteUsers: _data[0].muteUsers, type: _data[0].type })
             }
         })
     })
@@ -261,7 +269,7 @@ app.prepare().then(() => {
                         $set: {
                             "users": _users
                         }
-                    }).then(() => '')
+                    }).then(() => '');
                 } else if (data.type === 2) {
                     let _users = _data[0].users.map(w => (w.name === data.name ? { name: w.name, time: data.time } : w));
                     Users.updateOne({
