@@ -246,7 +246,10 @@ app.prepare().then(() => {
         Users.find({ login: data }).then(_data => {
             if (_data.length) {
                 let _users = _data[0].muteUsers.filter(w => w.time > (Date.now() / 1000));
-                // if (_data[0].muteUsers.filter((w,e) => (_users[e] && (w.name === _users[e].name))).length !== _users.length) {
+                if (
+                    (_data[0].muteUsers.length !== _users.length) ||
+                    (_data[0].muteUsers.map(w => w.name).filter(w => _users.map(e => e.name).includes(w)).length !== _users.length)
+                ) {
                     setTimeout(() => {
                         Users.updateOne({
                             login: data
@@ -256,7 +259,7 @@ app.prepare().then(() => {
                             }
                         }).then(() => '');
                     }, 5000)
-                // }
+                }
                 event.emit('getInfoRes', { chan: data, users: _data[0].users, muteUsers: _users, type: _data[0].type })
             }
         })
