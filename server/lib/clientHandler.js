@@ -75,6 +75,9 @@ function getClient(client_channel) {
                 type
             } = data;
 
+            let badWords = ['пид', 'ниг', 'pid', 'nig'];
+            let regWords = new RegExp(badWords.join('|'), 'gi');
+
             if (chan !== target.slice(1)) return;
 
             const isPrem = () => ((context.badges && (context.badges.moderator || context.badges.broadcaster)) || (context.username === 'fake_fake_fake_'));
@@ -85,7 +88,7 @@ function getClient(client_channel) {
             let user = users.find(w => w.name === context.username);
 
             if (isHighlight()) {
-                const t = text.replace(/пид|ниг|pid|nig/gi, '');
+                const t = text.replace(regWords, '');
                 emitPlay(t)
             } else
 
@@ -99,7 +102,7 @@ function getClient(client_channel) {
                 } else {
                     if (
                         (muteUsers.map(w => w.name.toLowerCase()).includes(context.username)) ||
-                        (/пид|ниг|pid|nig/.test([...text].filter(w => /([a-zA-Zа-яА-Я0-9])/gi.test(w)).join('')) || text.length > (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip) ? 250 : 150)) ||
+                        (regWords.test([...text].filter(w => /([a-zA-Zа-яА-Я0-9])/gi.test(w)).join('')) || text.length > (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip) ? 250 : 150)) ||
                         (user && ((Date.now() / 1000 - user.time / 1000) < (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip) ? 15 : 30)))
                     ) return;
                     if (isSub()) {
