@@ -191,7 +191,8 @@ app.prepare().then(() => {
     })
 
     const chat = require('../lib/chat-bot');
-    
+    const tgBot = require('../lib/tgBot');
+
     const io = socketIO(_server);
 
     event.on('play', (data) => {
