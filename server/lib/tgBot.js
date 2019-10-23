@@ -13,3 +13,5 @@ bot.on('message', function (msg) {
         text
     });
 });
+
+bot.on("polling_error", (err) => console.log(err));
