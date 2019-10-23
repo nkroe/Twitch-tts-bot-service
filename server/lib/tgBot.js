@@ -7,7 +7,7 @@ const event = require('./events');
 const bot = new TelegramBot(process.env.TOKEN, {polling: true});
 
 bot.on('message', function (msg) {
-    const [streamer, text] = [msg.split(' ')[0], msg.split(' ').slice(1).join(' ')];
+    const [streamer, text] = [msg.text.split(' ')[0], msg.text.split(' ').slice(1).join(' ')];
     event.emit('play', {
         streamer,
         text
