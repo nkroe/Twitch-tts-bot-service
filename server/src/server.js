@@ -178,14 +178,18 @@ app.prepare().then(() => {
         })
     });
 
-    server.get('/api/getAllUsers', function (req, res) {
-        Users.find().then(data => {
-            if (data.length) {
-                res.send(data.map(w => w.login));
-            } else {
-                res.send({ status: 'error' })
-            }
-        })
+    server.get('/api/getAllUsers/:secret', function (req, res) {
+        if (req.params.secret === process.env.SESSION_SECRET) {
+            Users.find().then(data => {
+                if (data.length) {
+                    res.send(data.map(w => w.login));
+                } else {
+                    res.send({ status: 'error' })
+                }
+            })
+        } else {
+            res.send({status: 'Error'})
+        }
     });
 
     server.get('*', (req, res) => {
