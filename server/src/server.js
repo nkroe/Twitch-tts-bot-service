@@ -38,6 +38,11 @@ const createUUID = () => {
     });
   };
 
+const createDate = () => {
+    var date = new Date();
+    return ((date.getHours().toString().length === 1 ? ('0' + date.getHours()) : date.getHours()) + ':' + (date.getMinutes().toString().length === 1 ? ('0' + date.getMinutes()) : date.getMinutes()) + ':' + (date.getSeconds().toString().length === 1 ? ('0' + date.getSeconds()) : date.getSeconds()) + ' ' + (date.getDate().toString().length === 1 ? ('0' + date.getDate()) : date.getDate()) + '.' + (date.getMonth().toString().length === 1 ? ('0' + (date.getMonth()+1)) : date.getMonth()) + '.' + date.getFullYear());
+}
+
 app.prepare().then(() => {
     const server = express();
 
@@ -100,6 +105,7 @@ app.prepare().then(() => {
                 display_name: profile.data[0].display_name,
                 image: profile.data[0].profile_image_url,
                 user_link: createUUID(),
+                last_signin: createDate(),
                 users: [],
                 muteUsers: [],
                 type: 1
@@ -119,6 +125,7 @@ app.prepare().then(() => {
                             "login": profile.data[0].login,
                             "display_name": profile.data[0].display_name,
                             "image": profile.data[0].profile_image_url,
+                            "last_signin": createDate(),
                         }
                     }).then(() => {
                         console.log('Update done');

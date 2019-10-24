@@ -16,6 +16,7 @@ const User = new Schema(
         display_name: String,
         image: String,
         user_link: String,
+        last_signin: String,
         users: Array,
         muteUsers: Array,
         type: String
