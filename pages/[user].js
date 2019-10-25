@@ -18,26 +18,47 @@ const User = () => {
         let queue = {
             msg: [],
             play: false,
-            curr: null
+            curr: null,
+            cors: false
         };
-        
-        let playQueue = () => {
-            if (!queue.msg.length || queue.play) return;
-            playSound(queue.msg[0]).then(() => playQueue()).catch(() => '')
-        }
-        
-        let loadSound = text => {
+
+        const createUrl = text => {
             let randVoice = voice[Math.round(0 - 0.5 + Math.random() * (3-0 + 1))];
-            fetch(`${ttsApi}?voice=${randVoice}&text=${text}`).then(data => {
-                data.arrayBuffer().then(data => audioCtx.decodeAudioData(data).then(_data => {
-                    queue.msg.push(_data);
-                    playQueue();
-                }));
-            }).catch(() => '')
+            if (!queue.cors) {
+                return `${ttsApi}?voice=${randVoice}&text=${text}`;
+            } else {
+                return `https://cors-anywhere.herokuapp.com/${ttsApi}?voice=${randVoice}&text=${text}`;
+            }
         }
+        
+        let playQueue = async () => {
+            if (queue.play || !queue.msg.length) return;
+            queue.play = true;
+            loadSound(queue.msg[0]).then(() => playQueue());
+        }
+        
+        let loadSound = text => new Promise(res => {
+            fetch(createUrl(text)).then(data => {
+                if (data.ok){
+                    data.arrayBuffer().then(data => audioCtx.decodeAudioData(data).then(_data => {
+                        playSound(_data).then(() => {
+                            res();
+                        })                        
+                    }));
+                } else {
+                    queue.cors = true;
+                    setTimeout(() => {
+                        queue.cors = false;
+                    }, 10000)
+                    setTimeout(() => {
+                        queue.play = false;
+                        res();
+                    }, 2000)
+                }
+            })
+        })
         
         let playSound = buff => new Promise(res => {
-            queue.play = true;
             let source = audioCtx.createBufferSource();
             source.buffer = buff;
             source.connect(audioCtx.destination);
@@ -55,7 +76,8 @@ const User = () => {
         socket.on('play', (data) => {
             const { user_link, text } = data;
             if (user_link === window.location.pathname.slice(1)) {
-                loadSound(text);
+                queue.msg.push(text);
+                playQueue();
             }
         });
         
