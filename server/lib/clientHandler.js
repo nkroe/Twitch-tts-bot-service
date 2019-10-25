@@ -71,6 +71,7 @@ function getClient(client_channel) {
             let {
                 chan,
                 users,
+                premUsers,
                 muteUsers,
                 type
             } = data;
@@ -83,7 +84,8 @@ function getClient(client_channel) {
             const isPrem = () => ((context.badges && (context.badges.moderator || context.badges.broadcaster)) || (context.username === 'fake_fake_fake_'));
             const isSub = () => ((type === '2') && (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip)));
             const isVip = () => ((type === '3') && (context.badges && context.badges.vip));
-            const isHighlight = () => ((type === '4') && (context['msg-id'] === 'highlighted-message'));
+            const isHighlight = () => ((type === '4') && ((context['msg-id'] === 'highlighted-message') || (context.username === 'fake_fake_fake_')));
+            const premMode = () => ((type === '5') && (premUsers.map(w => w.name).includes(context.username.toLowerCase()) || (context.username === 'fake_fake_fake_')));
 
             let user = users.find(w => w.name === context.username);
 
@@ -111,6 +113,9 @@ function getClient(client_channel) {
                         updateUsers(user)
                     } else if (type === '1') {
                         updateUsers(user)
+                    } else if (premMode()) {
+                        const t = text.replace(regWords, '');
+                        emitPlay(t)
                     }
                 }
             } else
@@ -132,6 +137,10 @@ function getClient(client_channel) {
                     updateType('1', 'всех');
                 } else
 
+                if (/^!fakeprem$/gi.test(msg)) {
+                    updateType('5', 'премиум пользователи');
+                } else
+
                 if (/^!skip$/gi.test(msg)) {
                     event.emit('skip', {
                         streamer: target.slice(1)
@@ -150,7 +159,7 @@ function getClient(client_channel) {
                     client.say(target, `@${context.username} для пользователя @${user} голосовой бот не доступен ${time} мин.`);
                 } else
 
-                if (/^!fakeunmute ([a-zA-Z0-9_])+$/gi.test(msg.trim()) && !muteUsers.includes(context.username)) {
+                if (/^!fakeunmute ([a-zA-Z0-9_])+$/gi.test(msg.trim())) {
                     if (msg.split(' ')[1]) {
                         event.emit('unmute', {
                             channel: target.slice(1),
@@ -158,6 +167,27 @@ function getClient(client_channel) {
                         });
                         console.log(`На канале ${target.slice(1)} был разблокирован пользователь ${msg.split(' ')[1]}`);
                         client.say(target, `@${context.username} для пользователя @${msg.split(' ')[1]} голосовой бот снова доступен`);
+                    }
+                } else 
+
+                if (/^!fakesetprem ([a-zA-Z0-9_])+$/gi.test(msg.trim()) && !premUsers.includes(context.username)) {
+                    let user = msg.split(' ')[1].toLowerCase();
+                    event.emit('setprem', {
+                        channel: target.slice(1),
+                        name: user
+                    });
+                    console.log(`На канале ${target.slice(1)} был добавлен премиум пользователь ${user}`);
+                    client.say(target, `@${context.username} пользователь @${user} был добавлен в премиум режим`);
+                } else
+
+                if (/^!fakeunprem ([a-zA-Z0-9_])+$/gi.test(msg.trim())) {
+                    if (msg.split(' ')[1]) {
+                        event.emit('unprem', {
+                            channel: target.slice(1),
+                            name: msg.split(' ')[1].toLowerCase()
+                        });
+                        console.log(`На канале ${target.slice(1)} был удален пользователь ${msg.split(' ')[1]} из премиума`);
+                        client.say(target, `@${context.username} пользователя @${msg.split(' ')[1]} больше не доступен премиум режим`);
                     }
                 }
             }

@@ -19,6 +19,7 @@ const User = new Schema(
         last_signin: String,
         users: Array,
         muteUsers: Array,
+        premUsers: Array,
         type: String
     }
 )

@@ -108,6 +108,7 @@ app.prepare().then(() => {
                 last_signin: createDate(),
                 users: [],
                 muteUsers: [],
+                premUsers: [],
                 type: 1
             });
             Users.find({
@@ -272,7 +273,7 @@ app.prepare().then(() => {
                         }).then(() => '');
                     }, 5000)
                 }
-                event.emit('getInfoRes', { chan: data, users: _data[0].users, muteUsers: _users, type: _data[0].type })
+                event.emit('getInfoRes', { chan: data, users: _data[0].users, muteUsers: _users, premUsers: _data[0].premUsers, type: _data[0].type })
             }
         })
     })
@@ -311,6 +312,36 @@ app.prepare().then(() => {
                 }, {
                     $set: {
                         "type": data.type
+                    }
+                }).then(() => '')
+            }
+        })
+    })
+
+    event.on('setprem', (data) => {
+        Users.find({ login: data.channel }).then(_data => {
+            if (_data.length) {
+                let _premUsers = _data[0].premUsers.concat((({ channel, ...w }) => w)(data));
+                Users.updateOne({
+                    login: data.channel
+                }, {
+                    $set: {
+                        "premUsers": _premUsers
+                    }
+                }).then(() => '')
+            }
+        })
+    })
+
+    event.on('unprem', (data) => {
+        Users.find({ login: data.channel }).then(_data => {
+            if (_data.length) {
+                let _premUsers = _data[0].premUsers.filter(w => w.name !== data.name);
+                Users.updateOne({
+                    login: data.channel
+                }, {
+                    $set: {
+                        "premUsers": _premUsers
                     }
                 }).then(() => '')
             }
