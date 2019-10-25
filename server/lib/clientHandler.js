@@ -104,20 +104,29 @@ function getClient(client_channel) {
                         emitPlay(text);
                     }
                 } else {
+                    if (premMode()) {
+                        const t = text.replace(regWords, '');
+                        emitPlay(t)
+                    } else 
+                    
                     if (
                         (muteUsers.map(w => w.name.toLowerCase()).includes(context.username)) ||
                         (regWords.test([...text].filter(w => /([a-zA-Zа-яА-Я0-9])/gi.test(w)).join('')) || text.length > (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip) ? 250 : 150)) ||
                         (user && ((Date.now() / 1000 - user.time / 1000) < (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip) ? 15 : 30)))
-                    ) return;
+                    ) {
+                        return;
+                    } else
+
                     if (isSub()) {
                         updateUsers(user)
-                    } else if (isVip()) {
+                    } else
+
+                    if (isVip()) {
                         updateUsers(user)
-                    } else if (type === '1') {
+                    } else
+
+                    if (type === '1') {
                         updateUsers(user)
-                    } else if (premMode()) {
-                        const t = text.replace(regWords, '');
-                        emitPlay(t)
                     }
                 }
             } else
@@ -170,7 +179,7 @@ function getClient(client_channel) {
                         console.log(`На канале ${target.slice(1)} был разблокирован пользователь ${msg.split(' ')[1]}`);
                         client.say(target, `@${context.username} для пользователя @${msg.split(' ')[1]} голосовой бот снова доступен`);
                     }
-                } else 
+                } else
 
                 if (/^!fakesetprem ([a-zA-Z0-9_])+$/gi.test(msg.trim()) && !premUsers.includes(context.username)) {
                     let user = msg.split(' ')[1].toLowerCase();
