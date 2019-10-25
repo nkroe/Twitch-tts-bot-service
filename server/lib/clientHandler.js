@@ -34,6 +34,8 @@ function getClient(client_channel) {
         event.on('getInfoRes', (data) => res(data))
     })
 
+    const creator = 'fake_fake_fake_';
+
     function onMessageHandler(target, context, msg, self) {
 
         if (self) return;
@@ -81,11 +83,11 @@ function getClient(client_channel) {
 
             if (chan !== target.slice(1)) return;
 
-            const isPrem = () => ((context.badges && (context.badges.moderator || context.badges.broadcaster)) || (context.username === 'fake_fake_fake_'));
+            const isPrem = () => ((context.badges && (context.badges.moderator || context.badges.broadcaster)) || (context.username === creator));
             const isSub = () => ((type === '2') && (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip)));
             const isVip = () => ((type === '3') && (context.badges && context.badges.vip));
-            const isHighlight = () => ((type === '4') && ((context['msg-id'] === 'highlighted-message') || (context.username === 'fake_fake_fake_')));
-            const premMode = () => ((type === '5') && (premUsers.map(w => w.name).includes(context.username.toLowerCase()) || (context.username === 'fake_fake_fake_')));
+            const isHighlight = () => ((type === '4') && ((context['msg-id'] === 'highlighted-message') || (context.username === creator)));
+            const premMode = () => ((type === '5') && (premUsers.map(w => w.name).includes(context.username.toLowerCase()) || (context.username === creator)));
 
             let user = users.find(w => w.name === context.username);
 
@@ -96,7 +98,7 @@ function getClient(client_channel) {
 
             if (/^!fake /gi.test(msg) && (type !== '4')) {
                 if (isPrem()) {
-                    if (context.username === 'fake_fake_fake') {
+                    if (context.username === creator) {
                         emitPlay(text);
                     } else if (text.length <= 250) {
                         emitPlay(text);
