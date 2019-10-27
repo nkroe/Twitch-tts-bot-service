@@ -198,7 +198,7 @@ function getClient(client_channel) {
                             name: msg.split(' ')[1].toLowerCase()
                         });
                         console.log(`На канале ${target.slice(1)} был удален пользователь ${msg.split(' ')[1]} из премиума`);
-                        client.say(target, `@${context.username} пользователя @${msg.split(' ')[1]} больше не доступен премиум режим`);
+                        client.say(target, `@${context.username} для пользователя @${msg.split(' ')[1]} больше не доступен премиум режим`);
                     }
                 }
             }
