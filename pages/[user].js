@@ -77,7 +77,9 @@ const User = () => {
             const { user_link, text } = data;
             if (user_link === window.location.pathname.slice(1)) {
                 queue.msg.push(text);
-                playQueue();
+                if (!queue.play) {
+                    playQueue();
+                }
             }
         });
         
