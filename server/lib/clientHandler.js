@@ -131,6 +131,14 @@ function getClient(client_channel) {
                 }
             } else
 
+            if (/^!fakecache$/gi.test(msg) && ((context.badges && context.badges.broadcaster) || (context.username === creator))) {
+                event.emit('reloadCache', {
+                    streamer: target.slice(1)
+                });
+                console.log(`На канале ${target.slice(1)} был обновлен кэш`);
+                client.say(target, `@${context.username} кэш обновлен`);
+            } else
+
             if (isPrem()) {
                 if (/^!fakesub$/gi.test(msg)) {
                     updateType('2', 'сабы и выше');

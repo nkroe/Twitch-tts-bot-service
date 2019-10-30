@@ -225,6 +225,15 @@ app.prepare().then(() => {
         })
     })
 
+    event.on('reloadCache', (data) => {
+        const { streamer } = data;
+        Users.find({ login: streamer }).then(_data => {
+            if (_data.length) {
+                io.emit('reloadCache', { user_link: _data[0].user_link })
+            }
+        })
+    })
+
     event.on('mute', (data) => {
         Users.find({ login: data.channel }).then(_data => {
             if (_data.length) {

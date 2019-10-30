@@ -93,6 +93,14 @@ const User = () => {
                 }
             }
         });
+
+        socket.on('reloadCache', data => {
+            const { user_link } = data;
+            if (user_link === window.location.pathname.slice(1)) {
+                window.location.reload();
+            }
+        });
+
     }, []);
 
     return (
