@@ -207,29 +207,26 @@ app.prepare().then(() => {
 
     const io = socketIO(_server);
 
-    event.on('play', (data) => {
-        const { streamer, text } = data;
+    event.on('play', ({ streamer, text }) => {
         Users.find({ login: streamer }).then(_data => {
             if (_data.length) {
-                io.emit('play', { user_link: _data[0].user_link, text })
+                io.emit(`play-${_data[0].user_link}`, text)
             }
         })
     });
 
-    event.on('skip', (data) => {
-        const { streamer } = data;
+    event.on('skip', ({ streamer }) => {
         Users.find({ login: streamer }).then(_data => {
             if (_data.length) {
-                io.emit('skip', { user_link: _data[0].user_link })
+                io.emit(`skip-${_data[0].user_link}`, '')
             }
         })
     })
 
-    event.on('reloadCache', (data) => {
-        const { streamer } = data;
+    event.on('reloadCache', ({ streamer }) => {
         Users.find({ login: streamer }).then(_data => {
             if (_data.length) {
-                io.emit('reloadCache', { user_link: _data[0].user_link })
+                io.emit(`reloadCache-${_data[0].user_link}`, '')
             }
         })
     })
