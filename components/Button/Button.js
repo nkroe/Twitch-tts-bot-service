@@ -30,8 +30,6 @@ const buttonHandler = (type, user = '') => {
         location.href = location.origin + '/api/auth/twitch';
     } else if (type === 3) {
         location.href = location.origin + '/api/logout';
-    } else if (type === 4) {
-        location.href = 'https://sun9-40.userapi.com/c855028/v855028145/11c4b2/t9VyGLWbPKU.jpg';
     }
 }
 
