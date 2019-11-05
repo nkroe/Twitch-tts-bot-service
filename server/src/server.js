@@ -1,17 +1,18 @@
 require('dotenv').config();
 
-const mongoose       = require('mongoose');
-const { Users }      = require('./users');
-const express        = require('express');
-const session        = require('express-session');
-const passport       = require('passport');
+const mongoose = require('mongoose');
+const { Users } = require('./users');
+const { Settings } = require('./settings');
+const express = require('express');
+const session = require('express-session');
+const passport = require('passport');
 const OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
-const request        = require('request');
-const cookieParser   = require('cookie-parser');
-const axios          = require('axios');
-const next           = require('next');
-const socketIO       = require('socket.io');
-const event          = require('../lib/events');
+const request = require('request');
+const cookieParser = require('cookie-parser');
+const axios = require('axios');
+const next = require('next');
+const socketIO = require('socket.io');
+const event = require('../lib/events');
 
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({
@@ -25,6 +26,13 @@ const SESSION_SECRET = process.env.SESSION_SECRET;
 const CALLBACK_URL = `${process.env.BACK}/api/auth/twitch/callback`;
 const MONGO = process.env.MONGO;
 const PORT = process.env.PORT || 8080;
+const FOLLOW_ID = process.env.FOLLOW_ID;
+const FOLLOW_SECRET = process.env.FOLLOW_SECRET;
+
+mongoose.connect(MONGO, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
 
 let acc = '';
 let ref = '';
@@ -32,15 +40,15 @@ let ref = '';
 const createUUID = () => {
     const pattern = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
     return pattern.replace(/[xy]/g, (c) => {
-      const r = (Math.random() * 16) | 0;
-      const v = c === 'x' ? r : ((r & 0x3) | 0x8);
-      return v.toString(16);
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : ((r & 0x3) | 0x8);
+        return v.toString(16);
     });
-  };
+};
 
 const createDate = () => {
     const date = new Date();
-    return (((date.getUTCHours() + 5).toString().length === 1 ? ('0' + (date.getUTCHours() + 5)) : (date.getUTCHours() + 5)) + ':' + (date.getMinutes().toString().length === 1 ? ('0' + date.getMinutes()) : date.getMinutes()) + ':' + (date.getSeconds().toString().length === 1 ? ('0' + date.getSeconds()) : date.getSeconds()) + ' ' + (date.getDate().toString().length === 1 ? ('0' + date.getDate()) : date.getDate()) + '.' + ((date.getMonth() + 1).toString().length === 1 ? ('0' + (date.getMonth()+1)) : (date.getMonth() + 1)) + '.' + date.getFullYear());
+    return (((date.getUTCHours() + 5).toString().length === 1 ? ('0' + (date.getUTCHours() + 5)) : (date.getUTCHours() + 5)) + ':' + (date.getMinutes().toString().length === 1 ? ('0' + date.getMinutes()) : date.getMinutes()) + ':' + (date.getSeconds().toString().length === 1 ? ('0' + date.getSeconds()) : date.getSeconds()) + ' ' + (date.getDate().toString().length === 1 ? ('0' + date.getDate()) : date.getDate()) + '.' + ((date.getMonth() + 1).toString().length === 1 ? ('0' + (date.getMonth() + 1)) : (date.getMonth() + 1)) + '.' + date.getFullYear());
 }
 
 app.prepare().then(() => {
@@ -115,7 +123,45 @@ app.prepare().then(() => {
                 "user_id": profile.data[0].id
             }).then((data) => {
                 if (data.length === 0) {
-                    getUser.save().then(() => event.emit('addChannel', profile.data[0].login));
+                    getUser.save().then(() => {
+                        let count = 0;
+                        const followChannel = c => {
+                            Settings.find({
+                                secret: SESSION_SECRET
+                            }).then(_settings => {
+                                if (_settings.length) {
+                                    if (c <= 1) {
+                                        axios.put(`https://api.twitch.tv/kraken/users/464971806/follows/channels/${profile.data[0].id}`, '', {
+                                            headers: {
+                                                'Authorization': `OAuth ${_settings[0].accessToken}`,
+                                                'Client-ID': FOLLOW_ID,
+                                                'Accept': 'application/vnd.twitchtv.v5+json'
+                                            }
+                                        }).then(() => '').catch(e => {
+                                            console.log(e.response.data)
+                                            axios.post(`https://id.twitch.tv/oauth2/token?grant_type=refresh_token&refresh_token=${_settings[0].refreshToken}&client_id=${FOLLOW_ID}&client_secret=${FOLLOW_SECRET}`).then(_refresh => {
+                                                Settings.updateOne({
+                                                    secret: SESSION_SECRET
+                                                }, {
+                                                    $set: {
+                                                        "accessToken": _refresh.data.access_token,
+                                                        "refreshToken": _refresh.data.refresh_token
+                                                    }
+                                                }).then(() => {
+                                                    count++;
+                                                    setTimeout(() => {
+                                                        followChannel(count);
+                                                    }, 1000)
+                                                });
+                                            }).catch(e => console.log(e.response.data))
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                        followChannel(count);
+                        event.emit('addChannel', profile.data[0].login);
+                    })
                 } else {
                     Users.updateOne({
                         "user_id": profile.data[0].id
@@ -134,8 +180,7 @@ app.prepare().then(() => {
                 }
             });
             done(null, profile);
-        }
-    ));
+        }));
 
     server.get('/api/auth/twitch', passport.authenticate('twitch', {
         scope: 'user_read'
@@ -170,11 +215,15 @@ app.prepare().then(() => {
     );
 
     server.get('/api/getUser/:accessToken', function (req, res) {
-        Users.find({ accessToken: req.params.accessToken }).then(data => {
+        Users.find({
+            accessToken: req.params.accessToken
+        }).then(data => {
             if (data.length) {
                 res.send(data[0]);
             } else {
-                res.send({ status: 'error' })
+                res.send({
+                    status: 'error'
+                })
             }
         })
     });
@@ -185,11 +234,15 @@ app.prepare().then(() => {
                 if (data.length) {
                     res.send(data.map(w => w.login));
                 } else {
-                    res.send({ status: 'error' })
+                    res.send({
+                        status: 'error'
+                    })
                 }
             })
         } else {
-            res.send({status: 'Error'})
+            res.send({
+                status: 'Error'
+            })
         }
     });
 
@@ -207,24 +260,37 @@ app.prepare().then(() => {
 
     const io = socketIO(_server);
 
-    event.on('play', ({ streamer, text }) => {
-        Users.find({ login: streamer }).then(_data => {
+    event.on('play', ({
+        streamer,
+        text
+    }) => {
+        Users.find({
+            login: streamer
+        }).then(_data => {
             if (_data.length) {
                 io.emit(`play-${_data[0].user_link}`, text)
             }
         })
     });
 
-    event.on('skip', ({ streamer }) => {
-        Users.find({ login: streamer }).then(_data => {
+    event.on('skip', ({
+        streamer
+    }) => {
+        Users.find({
+            login: streamer
+        }).then(_data => {
             if (_data.length) {
                 io.emit(`skip-${_data[0].user_link}`, '')
             }
         })
     })
 
-    event.on('reloadCache', ({ streamer }) => {
-        Users.find({ login: streamer }).then(_data => {
+    event.on('reloadCache', ({
+        streamer
+    }) => {
+        Users.find({
+            login: streamer
+        }).then(_data => {
             if (_data.length) {
                 io.emit(`reloadCache-${_data[0].user_link}`, '')
             }
@@ -232,9 +298,14 @@ app.prepare().then(() => {
     })
 
     event.on('mute', (data) => {
-        Users.find({ login: data.channel }).then(_data => {
+        Users.find({
+            login: data.channel
+        }).then(_data => {
             if (_data.length) {
-                let _muteUsers = _data[0].muteUsers.concat((({ channel, ...w }) => w)(data));
+                let _muteUsers = _data[0].muteUsers.concat((({
+                    channel,
+                    ...w
+                }) => w)(data));
                 Users.updateOne({
                     login: data.channel
                 }, {
@@ -247,7 +318,9 @@ app.prepare().then(() => {
     })
 
     event.on('unmute', (data) => {
-        Users.find({ login: data.channel }).then(_data => {
+        Users.find({
+            login: data.channel
+        }).then(_data => {
             if (_data.length) {
                 let _muteUsers = _data[0].muteUsers.filter(w => w.name !== data.name);
                 Users.updateOne({
@@ -262,7 +335,9 @@ app.prepare().then(() => {
     })
 
     event.on('getInfo', (data) => {
-        Users.find({ login: data }).then(_data => {
+        Users.find({
+            login: data
+        }).then(_data => {
             if (_data.length) {
                 let _users = _data[0].muteUsers.filter(w => w.time > (Date.now() / 1000));
                 if (
@@ -279,16 +354,28 @@ app.prepare().then(() => {
                         }).then(() => '');
                     }, 5000)
                 }
-                event.emit('getInfoRes', { chan: data, users: _data[0].users, muteUsers: _users, premUsers: _data[0].premUsers, type: _data[0].type })
+                event.emit('getInfoRes', {
+                    chan: data,
+                    users: _data[0].users,
+                    muteUsers: _users,
+                    premUsers: _data[0].premUsers,
+                    type: _data[0].type
+                })
             }
         })
     })
 
     event.on('updateUsers', (data) => {
-        Users.find({ login: data.channel }).then(_data => {
+        Users.find({
+            login: data.channel
+        }).then(_data => {
             if (_data.length) {
-                if (data.type === 1){
-                    let _users = _data[0].users.concat((({ channel, type, ...w }) => w)(data));
+                if (data.type === 1) {
+                    let _users = _data[0].users.concat((({
+                        channel,
+                        type,
+                        ...w
+                    }) => w)(data));
                     Users.updateOne({
                         login: data.channel
                     }, {
@@ -297,7 +384,10 @@ app.prepare().then(() => {
                         }
                     }).then(() => '');
                 } else if (data.type === 2) {
-                    let _users = _data[0].users.map(w => (w.name === data.name ? { name: w.name, time: data.time } : w));
+                    let _users = _data[0].users.map(w => (w.name === data.name ? {
+                        name: w.name,
+                        time: data.time
+                    } : w));
                     Users.updateOne({
                         login: data.channel
                     }, {
@@ -311,7 +401,9 @@ app.prepare().then(() => {
     })
 
     event.on('updateType', (data) => {
-        Users.find({ login: data.channel }).then(_data => {
+        Users.find({
+            login: data.channel
+        }).then(_data => {
             if (_data.length) {
                 Users.updateOne({
                     login: data.channel
@@ -325,9 +417,14 @@ app.prepare().then(() => {
     })
 
     event.on('setprem', (data) => {
-        Users.find({ login: data.channel }).then(_data => {
+        Users.find({
+            login: data.channel
+        }).then(_data => {
             if (_data.length) {
-                let _premUsers = _data[0].premUsers.concat((({ channel, ...w }) => w)(data));
+                let _premUsers = _data[0].premUsers.concat((({
+                    channel,
+                    ...w
+                }) => w)(data));
                 Users.updateOne({
                     login: data.channel
                 }, {
@@ -340,7 +437,9 @@ app.prepare().then(() => {
     })
 
     event.on('unprem', (data) => {
-        Users.find({ login: data.channel }).then(_data => {
+        Users.find({
+            login: data.channel
+        }).then(_data => {
             if (_data.length) {
                 let _premUsers = _data[0].premUsers.filter(w => w.name !== data.name);
                 Users.updateOne({
@@ -361,7 +460,7 @@ app.prepare().then(() => {
             console.log('Client disconnect')
         })
     })
-    
+
 }).catch((ex) => {
     process.exit(1)
     console.error(ex.stack)
