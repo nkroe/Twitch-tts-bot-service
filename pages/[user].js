@@ -18,7 +18,7 @@ const User = () => {
             'voice': 'Microsoft Irina Desktop - Russian',
             'splitSentences': true,
             'listeners': {
-                'onvoiceschanged': (voices) => console.log(voices)
+                'onvoiceschanged': () => ''
             }
         }).then((data) => '').catch(e => '');
         
@@ -60,8 +60,6 @@ const User = () => {
         socket.on(`skip-${window.location.pathname.slice(1)}`, () => {
             if (queue.msg.length) {
                 speech.cancel();
-                queue.play = false;
-                queue.msg = queue.msg.slice(1);
             }
         });
 
