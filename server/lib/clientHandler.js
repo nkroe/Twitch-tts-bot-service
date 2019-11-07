@@ -45,7 +45,7 @@ function getClient(client_channel) {
 
         const emitPlay = (t) => event.emit('play', {
             streamer: target.slice(1),
-            text: t
+            text: t.replace(/й/gi, 'и')
         });
 
         const updateUsers = u => {
