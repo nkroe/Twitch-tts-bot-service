@@ -86,7 +86,7 @@ function getClient(client_channel) {
             const isPrem = () => ((context.badges && (context.badges.moderator || context.badges.broadcaster)) || (context.username === creator));
             const isSub = () => ((type === '2') && (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip)));
             const isVip = () => ((type === '3') && (context.badges && context.badges.vip));
-            const isHighlight = () => ((type === '4') && ((context['msg-id'] === 'highlighted-message') || (context.username === creator)));
+            const isHighlight = () => ((type === '4') && (context['msg-id'] === 'highlighted-message'));
             const premMode = () => ((type === '5') && (premUsers.map(w => w.name).includes(context.username.toLowerCase()) || (context.username === creator)));
 
             let user = users.find(w => w.name === context.username);
