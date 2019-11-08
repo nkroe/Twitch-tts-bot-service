@@ -92,7 +92,7 @@ function getClient(client_channel) {
             let user = users.find(w => w.name === context.username);
 
             if (isHighlight()) {
-                const t = text.replace(regWords, '');
+                const t = msg.replace(regWords, '');
                 emitPlay(t)
             } else
 
