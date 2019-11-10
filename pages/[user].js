@@ -4,8 +4,6 @@ import { route } from 'next/dist/next-server/server/router';
 import getConfig from 'next/config';
 
 const { publicRuntimeConfig } = getConfig()
-const voice = ['ru-RU-Wavenet-A', 'ru-RU-Wavenet-B', 'ru-RU-Wavenet-C', 'ru-RU-Wavenet-D'];
-const ttsApi = 'https://api.streamelements.com/kappa/v2/speech';
 
 const User = () => {
 
@@ -22,41 +20,11 @@ const User = () => {
             cors: false
         };
 
-        const createUrl = text => {
-            let randVoice = voice[Math.round(0 - 0.5 + Math.random() * (3 - 0 + 1))];
-            if (!queue.cors) {
-                return `${ttsApi}?voice=${randVoice}&text=${text}`;
-            } else {
-                return `https://cors-anywhere.herokuapp.com/${ttsApi}?voice=${randVoice}&text=${text}`;
-            }
-        }
-
         let playQueue = async () => {
             if (queue.play || !queue.msg.length) return;
             queue.play = true;
-            loadSound(queue.msg[0]).then(() => playQueue());
+            playSound(queue.msg[0]).then(() => playQueue());
         }
-
-        let loadSound = text => new Promise(res => {
-            fetch(createUrl(text)).then(data => {
-                if (data.ok) {
-                    data.arrayBuffer().then(data => audioCtx.decodeAudioData(data).then(_data => {
-                        playSound(_data).then(() => {
-                            res();
-                        })
-                    }));
-                } else {
-                    queue.cors = true;
-                    setTimeout(() => {
-                        queue.cors = false;
-                    }, 10000)
-                    setTimeout(() => {
-                        queue.play = false;
-                        res();
-                    }, 2000)
-                }
-            })
-        })
 
         let playSound = buff => new Promise(res => {
             let source = audioCtx.createBufferSource();
@@ -74,10 +42,12 @@ const User = () => {
         const socket = io(publicRuntimeConfig.BACK);
 
         socket.on(`play-${window.location.pathname.slice(1)}`, data => {
-            queue.msg.push(data);
-            if (!queue.play) {
-                playQueue();
-            }
+            audioCtx.decodeAudioData(data).then(_data => {
+                queue.msg.push(_data);
+                if (!queue.play) {
+                    playQueue();
+                }
+            })
         });
 
         socket.on(`skip-${window.location.pathname.slice(1)}`, () => {

@@ -111,7 +111,7 @@ function getClient(client_channel) {
                     
                     if (
                         (muteUsers.map(w => w.name.toLowerCase()).includes(context.username)) ||
-                        (regWords.test([...text].filter(w => /([a-zA-Zа-яА-Я0-9])/gi.test(w)).join('')) || text.length > (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip) ? 250 : 150)) ||
+                        (regWords.test([...text].filter(w => /([a-zA-Zа-яА-Я0-9+-])/gi.test(w)).join('')) || text.length > (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip) ? 250 : 150)) ||
                         (user && ((Date.now() / 1000 - user.time / 1000) < (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip) ? 15 : 30)))
                     ) {
                         return;

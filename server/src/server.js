@@ -13,6 +13,7 @@ const axios = require('axios');
 const next = require('next');
 const socketIO = require('socket.io');
 const event = require('../lib/events');
+const fetch = require('node-fetch');
 
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({
@@ -28,6 +29,8 @@ const MONGO = process.env.MONGO;
 const PORT = process.env.PORT || 8080;
 const FOLLOW_ID = process.env.FOLLOW_ID;
 const FOLLOW_SECRET = process.env.FOLLOW_SECRET;
+const TTS_API = process.env.TTS_API;
+const OAUTH_TOKEN = process.env.OAUTH_TOKEN;
 
 mongoose.connect(MONGO, {
     useNewUrlParser: true,
@@ -50,6 +53,29 @@ const createDate = () => {
     const date = new Date();
     return (((date.getUTCHours() + 5).toString().length === 1 ? ('0' + (date.getUTCHours() + 5)) : (date.getUTCHours() + 5)) + ':' + (date.getMinutes().toString().length === 1 ? ('0' + date.getMinutes()) : date.getMinutes()) + ':' + (date.getSeconds().toString().length === 1 ? ('0' + date.getSeconds()) : date.getSeconds()) + ' ' + (date.getDate().toString().length === 1 ? ('0' + date.getDate()) : date.getDate()) + '.' + ((date.getMonth() + 1).toString().length === 1 ? ('0' + (date.getMonth() + 1)) : (date.getMonth() + 1)) + '.' + date.getFullYear());
 }
+
+const updateToken = () => {
+    const body = JSON.stringify({
+        "yandexPassportOauthToken": OAUTH_TOKEN
+    });
+    axios.post('https://iam.api.cloud.yandex.net/iam/v1/tokens', body).then(data => {
+        Settings.updateOne({
+            secret: SESSION_SECRET
+        }, {
+            $set: {
+                "ttsToken": data.data.iamToken
+            }
+        }).then(() => '');
+    }).catch(e => console.log(`Error ${e}`))
+}
+
+updateToken();
+
+setInterval(() => {
+    updateToken();
+}, 1000 * 60 * 60)
+
+const rand = (min, max) => Math.round(min - 0.5 + Math.random() * (max - min + 1));
 
 app.prepare().then(() => {
     const server = express();
@@ -268,7 +294,20 @@ app.prepare().then(() => {
             login: streamer
         }).then(_data => {
             if (_data.length) {
-                io.emit(`play-${_data[0].user_link}`, text)
+                Settings.find({
+                    secret: SESSION_SECRET
+                }).then(async settings => {
+                    if (settings.length) {
+                        const res = await fetch(encodeURI(`${TTS_API}?text=${text}&lang=ru-RU&voice=${['zahar', 'oksana'][rand(0,1)]}&emotion=neutral&folderId=${settings[0].folder}`), {
+                            method: 'POST',
+                            headers: {
+                                "Authorization": `Bearer ${settings[0].ttsToken}`,
+                                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                            }
+                        })
+                        res.arrayBuffer().then(buff => io.emit(`play-${_data[0].user_link}`, buff))
+                    }
+                })
             }
         })
     });
