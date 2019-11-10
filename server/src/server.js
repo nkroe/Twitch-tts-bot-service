@@ -298,7 +298,7 @@ app.prepare().then(() => {
                     secret: SESSION_SECRET
                 }).then(async settings => {
                     if (settings.length) {
-                        const res = await fetch(encodeURI(`${TTS_API}?text=${text}&lang=ru-RU&voice=${['zahar', 'oksana'][rand(0,1)]}&emotion=neutral&folderId=${settings[0].folder}`), {
+                        const res = await fetch(encodeURI(`${TTS_API}?text=${text}&lang=ru-RU&voice=${['filipp', 'alena'][rand(0,1)]}&emotion=neutral&folderId=${settings[0].folder}`), {
                             method: 'POST',
                             headers: {
                                 "Authorization": `Bearer ${settings[0].ttsToken}`,
