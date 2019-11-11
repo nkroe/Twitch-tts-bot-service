@@ -39,6 +39,7 @@ mongoose.connect(MONGO, {
 
 let acc = '';
 let ref = '';
+let statsMess = 0;
 
 const createUUID = () => {
     const pattern = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
@@ -74,6 +75,24 @@ updateToken();
 setInterval(() => {
     updateToken();
 }, 1000 * 60 * 60)
+
+setInterval(() => {
+    Settings.find({
+        secret: SESSION_SECRET
+    }).then(_settings => {
+        if (_settings.length) {
+            Settings.updateOne({
+                secret: SESSION_SECRET
+            }, {
+                $set: {
+                    stats: parseFloat(_settings[0].stats) + statsMess
+                }
+            }).then(() => {
+                statsMess = 0
+            })
+        }
+    })
+}, 1000 * 60 * 5)
 
 const rand = (min, max) => Math.round(min - 0.5 + Math.random() * (max - min + 1));
 
@@ -305,6 +324,7 @@ app.prepare().then(() => {
                                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
                             }
                         })
+                        statsMess += text.length;
                         res.arrayBuffer().then(buff => io.emit(`play-${_data[0].user_link}`, buff))
                     }
                 })

@@ -7,7 +7,8 @@ const Setting = new Schema(
         refreshToken: String,
         secret: String,
         ttsToken: String,
-        folder: String
+        folder: String,
+        stats: String
     }
 )
 
