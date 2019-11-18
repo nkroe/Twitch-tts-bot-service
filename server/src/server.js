@@ -14,6 +14,7 @@ const next = require('next');
 const socketIO = require('socket.io');
 const event = require('../lib/events');
 const fetch = require('node-fetch');
+const cors = require('cors');
 
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({
@@ -95,6 +96,8 @@ setInterval(() => {
 }, 1000 * 60 * 5)
 
 const rand = (min, max) => Math.round(min - 0.5 + Math.random() * (max - min + 1));
+
+app.use(cors({ origin: process.env.BACK }))
 
 app.prepare().then(() => {
     const server = express();

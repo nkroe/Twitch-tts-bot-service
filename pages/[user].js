@@ -1,6 +1,5 @@
 import io from 'socket.io-client';
 import { useEffect } from 'react';
-import { route } from 'next/dist/next-server/server/router';
 import getConfig from 'next/config';
 
 const { publicRuntimeConfig } = getConfig()
@@ -16,11 +15,10 @@ const User = () => {
         let queue = {
             msg: [],
             play: false,
-            curr: null,
-            cors: false
+            curr: null
         };
 
-        let playQueue = async () => {
+        let playQueue = () => {
             if (queue.play || !queue.msg.length) return;
             queue.play = true;
             playSound(queue.msg[0]).then(() => playQueue());
@@ -53,8 +51,6 @@ const User = () => {
         socket.on(`skip-${window.location.pathname.slice(1)}`, () => {
             if (queue.curr) {
                 queue.curr.stop();
-                queue.play = false;
-                queue.msg = queue.msg.slice(1);
             }
         });
 
