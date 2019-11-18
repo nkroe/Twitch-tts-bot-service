@@ -45,7 +45,7 @@ function getClient(client_channel) {
 
         const emitPlay = (t) => event.emit('play', {
             streamer: target.slice(1),
-            text: [...t].filter(w => /([a-zA-Zа-яА-Я0-9+-])/gi.test(w)).join('')
+            text: [...t].filter(w => /([a-zA-Zа-яА-Я0-9+-\s])/gi.test(w)).join('')
         });
 
         const updateUsers = u => {
