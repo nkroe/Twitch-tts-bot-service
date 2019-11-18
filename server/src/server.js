@@ -97,8 +97,6 @@ setInterval(() => {
 
 const rand = (min, max) => Math.round(min - 0.5 + Math.random() * (max - min + 1));
 
-app.use(cors({ origin: process.env.BACK }))
-
 app.prepare().then(() => {
     const server = express();
 
@@ -107,7 +105,8 @@ app.prepare().then(() => {
         resave: false,
         saveUninitialized: false
     }));
-
+    
+    server.use(cors({ origin: process.env.BACK }))
     server.use(passport.initialize());
     server.use(passport.session());
     server.use(cookieParser());
