@@ -15,7 +15,8 @@ const User = new Schema(
         users: Array,
         muteUsers: Array,
         premUsers: Array,
-        type: String
+        type: String,
+        stats: String
     }
 )
 

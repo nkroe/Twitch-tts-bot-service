@@ -40,7 +40,7 @@ mongoose.connect(MONGO, {
 
 let acc = '';
 let ref = '';
-let statsMess = 0;
+let statsMess = [];
 
 const createUUID = () => {
     const pattern = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
@@ -78,22 +78,22 @@ setInterval(() => {
 }, 1000 * 60 * 60)
 
 setInterval(() => {
-    Settings.find({
-        secret: SESSION_SECRET
-    }).then(_settings => {
-        if (_settings.length) {
-            Settings.updateOne({
-                secret: SESSION_SECRET
-            }, {
-                $set: {
-                    stats: parseFloat(_settings[0].stats) + statsMess
-                }
-            }).then(() => {
-                statsMess = 0
-            })
-        }
+    statsMess.forEach(w => {
+        Users.find({ login: w[0] }).then(data => {
+            if (data.length) {
+                Users.updateOne({
+                    login: w[0]
+                }, {
+                    $set: {
+                        stats: parseFloat(data[0].stats) + w[1]
+                    }
+                }).then(() => {
+                    statsMess = statsMess.map(e => e[0] === w[0] ? [e[0], 0] : e)
+                })
+            }
+        })
     })
-}, 1000 * 60 * 5)
+}, 1000 * 60 * 10)
 
 const rand = (min, max) => Math.round(min - 0.5 + Math.random() * (max - min + 1));
 
@@ -164,7 +164,8 @@ app.prepare().then(() => {
                 users: [],
                 muteUsers: [],
                 premUsers: [],
-                type: 1
+                type: 1,
+                stats: 0
             });
             Users.find({
                 "user_id": profile.data[0].id
@@ -319,15 +320,21 @@ app.prepare().then(() => {
                     secret: SESSION_SECRET
                 }).then(async settings => {
                     if (settings.length) {
-                        const res = await fetch(encodeURI(`${TTS_API}?text=${text}&lang=ru-RU&voice=${['filipp', 'alena'][rand(0,1)]}&emotion=neutral&folderId=${settings[0].folder}`), {
-                            method: 'POST',
-                            headers: {
-                                "Authorization": `Bearer ${settings[0].ttsToken}`,
-                                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-                            }
-                        })
-                        statsMess += text.length;
-                        res.arrayBuffer().then(buff => io.emit(`play-${_data[0].user_link}`, buff))
+                        try {
+                            const res = await fetch(encodeURI(`${TTS_API}?text=${text}&lang=ru-RU&voice=${['ermil', 'oksana'][rand(0,1)]}&emotion=evil&folderId=${settings[0].folder}`), {
+                                method: 'POST',
+                                headers: {
+                                    "Authorization": `Bearer ${settings[0].ttsToken}`,
+                                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                                }
+                            })
+                            if (!statsMess.filter(w => w[0] === streamer).length) statsMess.push([streamer, 0])
+                            statsMess = statsMess.map(w => w[0] === streamer ? [w[0], w[1] + text.length] : w)
+                            res.arrayBuffer().then(buff => io.emit(`play-${_data[0].user_link}`, buff))
+                        } catch(e) {
+                            console.log(`На канале ${streamer} не было прочитано сообщение: ${text}`)
+                            console.log(e);
+                        }
                     }
                 })
             }
