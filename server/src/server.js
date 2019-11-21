@@ -321,7 +321,7 @@ app.prepare().then(() => {
                 }).then(async settings => {
                     if (settings.length) {
                         try {
-                            const res = await fetch(encodeURI(`${TTS_API}?text=${text}&lang=ru-RU&voice=${['ermil', 'oksana'][rand(0,1)]}&emotion=evil&folderId=${settings[0].folder}`), {
+                            const res = await fetch(encodeURI(`${TTS_API}?text=${text}&lang=ru-RU&voice=${['zahar', 'ermil', 'oksana'][rand(0,1)]}&emotion=evil&folderId=${settings[0].folder}`), {
                                 method: 'POST',
                                 headers: {
                                     "Authorization": `Bearer ${settings[0].ttsToken}`,
