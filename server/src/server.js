@@ -1,8 +1,12 @@
 require('dotenv').config();
 
 const mongoose = require('mongoose');
-const { Users } = require('./users');
-const { Settings } = require('./settings');
+const {
+    Users
+} = require('./users');
+const {
+    Settings
+} = require('./settings');
 const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
@@ -56,30 +60,11 @@ const createDate = () => {
     return (((date.getUTCHours() + 5).toString().length === 1 ? ('0' + (date.getUTCHours() + 5)) : (date.getUTCHours() + 5)) + ':' + (date.getMinutes().toString().length === 1 ? ('0' + date.getMinutes()) : date.getMinutes()) + ':' + (date.getSeconds().toString().length === 1 ? ('0' + date.getSeconds()) : date.getSeconds()) + ' ' + (date.getDate().toString().length === 1 ? ('0' + date.getDate()) : date.getDate()) + '.' + ((date.getMonth() + 1).toString().length === 1 ? ('0' + (date.getMonth() + 1)) : (date.getMonth() + 1)) + '.' + date.getFullYear());
 }
 
-const updateToken = () => {
-    const body = JSON.stringify({
-        "yandexPassportOauthToken": OAUTH_TOKEN
-    });
-    axios.post('https://iam.api.cloud.yandex.net/iam/v1/tokens', body).then(data => {
-        Settings.updateOne({
-            secret: SESSION_SECRET
-        }, {
-            $set: {
-                "ttsToken": data.data.iamToken
-            }
-        }).then(() => '');
-    }).catch(e => console.log(`Error ${e}`))
-}
-
-updateToken();
-
-setInterval(() => {
-    updateToken();
-}, 1000 * 60 * 60)
-
 setInterval(() => {
     statsMess.forEach(w => {
-        Users.find({ login: w[0] }).then(data => {
+        Users.find({
+            login: w[0]
+        }).then(data => {
             if (data.length) {
                 Users.updateOne({
                     login: w[0]
@@ -105,8 +90,10 @@ app.prepare().then(() => {
         resave: false,
         saveUninitialized: false
     }));
-    
-    server.use(cors({ origin: process.env.BACK }))
+
+    server.use(cors({
+        origin: process.env.BACK
+    }))
     server.use(passport.initialize());
     server.use(passport.session());
     server.use(cookieParser());
@@ -308,10 +295,7 @@ app.prepare().then(() => {
 
     const io = socketIO(_server);
 
-    event.on('play', ({
-        streamer,
-        text
-    }) => {
+    event.on('play', ({ streamer, text }) => {
         Users.find({
             login: streamer
         }).then(_data => {
@@ -321,17 +305,31 @@ app.prepare().then(() => {
                 }).then(async settings => {
                     if (settings.length) {
                         try {
-                            const res = await fetch(encodeURI(`${TTS_API}?text=${text}&lang=ru-RU&voice=${['zahar', 'ermil', 'oksana'][rand(0,1)]}&emotion=evil&folderId=${settings[0].folder}`), {
-                                method: 'POST',
-                                headers: {
-                                    "Authorization": `Bearer ${settings[0].ttsToken}`,
-                                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                            const body = {
+                                "input": {
+                                    "text": text
+                                },
+                                "voice": {
+                                    "languageCode": "ru-RU",
+                                    "name": ['ru-RU-Standard-A', 'ru-RU-Standard-D'][rand(0,1)]
+                                },
+                                "audioConfig": {
+                                    "audioEncoding": "OGG_OPUS"
                                 }
+                            }
+                            const res = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${settings[0].apiKey}`, {
+                                method: 'post',
+                                body: JSON.stringify(body),
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+                            res.json().then(jsonData => {
+                                if (!statsMess.filter(w => w[0] === streamer).length) statsMess.push([streamer, 0])
+                                statsMess = statsMess.map(w => w[0] === streamer ? [w[0], w[1] + text.length] : w)
+                                io.emit(`play-${_data[0].user_link}`, jsonData.audioContent)
                             })
-                            if (!statsMess.filter(w => w[0] === streamer).length) statsMess.push([streamer, 0])
-                            statsMess = statsMess.map(w => w[0] === streamer ? [w[0], w[1] + text.length] : w)
-                            res.arrayBuffer().then(buff => io.emit(`play-${_data[0].user_link}`, buff))
-                        } catch(e) {
+                        } catch (e) {
                             console.log(`На канале ${streamer} не было прочитано сообщение: ${text}`)
                             console.log(e);
                         }

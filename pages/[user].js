@@ -40,7 +40,7 @@ const User = () => {
         const socket = io(publicRuntimeConfig.BACK);
 
         socket.on(`play-${window.location.pathname.slice(1)}`, data => {
-            audioCtx.decodeAudioData(data).then(_data => {
+            audioCtx.decodeAudioData((Uint8Array.from(atob(data), c => c.charCodeAt(0))).buffer).then(_data => {
                 queue.msg.push(_data);
                 if (!queue.play) {
                     playQueue();
