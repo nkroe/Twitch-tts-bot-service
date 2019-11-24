@@ -311,7 +311,7 @@ app.prepare().then(() => {
                                 },
                                 "voice": {
                                     "languageCode": "ru-RU",
-                                    "name": ['ru-RU-Standard-A', 'ru-RU-Standard-D'][rand(0,1)]
+                                    "name": ['ru-RU-Wavenet-A', 'ru-RU-Wavenet-D'][rand(0,1)]
                                 },
                                 "audioConfig": {
                                     "audioEncoding": "OGG_OPUS"
