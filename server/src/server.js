@@ -295,44 +295,47 @@ app.prepare().then(() => {
 
     const io = socketIO(_server);
 
-    event.on('play', ({ streamer, text }) => {
+    event.on('play', ({
+        streamer,
+        text
+    }) => {
         Users.find({
             login: streamer
         }).then(_data => {
             if (_data.length) {
                 Settings.find({
                     secret: SESSION_SECRET
-                }).then(async settings => {
+                }).then(settings => {
                     if (settings.length) {
-                        try {
-                            const body = {
-                                "input": {
-                                    "text": text
-                                },
-                                "voice": {
-                                    "languageCode": "ru-RU",
-                                    "name": ['ru-RU-Wavenet-A', 'ru-RU-Wavenet-D'][rand(0,1)]
-                                },
-                                "audioConfig": {
-                                    "audioEncoding": "OGG_OPUS"
-                                }
+                        const body = {
+                            "input": {
+                                "text": text
+                            },
+                            "voice": {
+                                "languageCode": "ru-RU",
+                                "name": ['ru-RU-Wavenet-A', 'ru-RU-Wavenet-D'][rand(0, 1)]
+                            },
+                            "audioConfig": {
+                                "audioEncoding": "OGG_OPUS"
                             }
-                            const res = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${settings[0].apiKey}`, {
-                                method: 'post',
-                                body: JSON.stringify(body),
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            });
+                        }
+                        fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${settings[0].apiKey}`, {
+                            method: 'post',
+                            body: JSON.stringify(body),
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        }).then(res => {
                             res.json().then(jsonData => {
                                 if (!statsMess.filter(w => w[0] === streamer).length) statsMess.push([streamer, 0])
                                 statsMess = statsMess.map(w => w[0] === streamer ? [w[0], w[1] + text.length] : w)
                                 io.emit(`play-${_data[0].user_link}`, jsonData.audioContent)
                             })
-                        } catch (e) {
+                        }).catch(() => {
                             console.log(`На канале ${streamer} не было прочитано сообщение: ${text}`)
                             console.log(e);
-                        }
+                        })
+
                     }
                 })
             }
