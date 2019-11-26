@@ -22,7 +22,7 @@
     "dotenv": "^8.1.0",
     "express": "^4.17.1",
     "express-session": "^1.15.2",
-    "handlebars": "^4.5.1",
+    "handlebars": "^4.5.3",
     "load-script": "^1.0.0",
     "micro": "^9.3.4",
     "mongoose": "^5.7.5",

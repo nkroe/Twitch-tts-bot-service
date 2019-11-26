@@ -31,7 +31,7 @@ function getClient(client_channel) {
 
     const getChannelInfo = (chan) => new Promise(res => {
         event.emit('getInfo', chan);
-        event.on('getInfoRes', (data) => res(data))
+        event.on(`getInfoRes-${chan}`, (data) => res(data))
     })
 
     const creator = 'fake_fake_fake_';

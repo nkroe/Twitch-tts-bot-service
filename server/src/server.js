@@ -423,7 +423,7 @@ app.prepare().then(() => {
                         }).then(() => '');
                     }, 5000)
                 }
-                event.emit('getInfoRes', {
+                event.emit(`getInfoRes-${data}`, {
                     chan: data,
                     users: _data[0].users,
                     muteUsers: _users,
