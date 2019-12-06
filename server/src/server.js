@@ -39,7 +39,8 @@ const OAUTH_TOKEN = process.env.OAUTH_TOKEN;
 
 mongoose.connect(MONGO, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useFindAndModify: false
 });
 
 let acc = '';
@@ -127,13 +128,13 @@ app.prepare().then(() => {
     });
 
     passport.use('twitch', new OAuth2Strategy({
-            authorizationURL: 'https://id.twitch.tv/oauth2/authorize',
-            tokenURL: 'https://id.twitch.tv/oauth2/token',
-            clientID: TWITCH_CLIENT_ID,
-            clientSecret: TWITCH_SECRET,
-            callbackURL: CALLBACK_URL,
-            state: true
-        },
+        authorizationURL: 'https://id.twitch.tv/oauth2/authorize',
+        tokenURL: 'https://id.twitch.tv/oauth2/token',
+        clientID: TWITCH_CLIENT_ID,
+        clientSecret: TWITCH_SECRET,
+        callbackURL: CALLBACK_URL,
+        state: true
+    },
         function (accessToken, refreshToken, profile, done) {
             profile.accessToken = accessToken;
             profile.refreshToken = refreshToken;
@@ -316,7 +317,8 @@ app.prepare().then(() => {
                                 "name": ['ru-RU-Wavenet-A', 'ru-RU-Wavenet-D'][rand(0, 1)]
                             },
                             "audioConfig": {
-                                "audioEncoding": "OGG_OPUS"
+                                "audioEncoding": "OGG_OPUS",
+                                "volumeGainDb": _data[0].volume || 0
                             }
                         }
                         fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${settings[0].apiKey}`, {
@@ -524,6 +526,18 @@ app.prepare().then(() => {
 
     io.on('connection', socket => {
         console.log('Client connected');
+
+        socket.on('setVolume', ({ streamer, volume }) => {
+            Users.findOneAndUpdate({ accessToken: streamer }, { volume }).then(() => '')
+        })
+
+        socket.on('testVolume', ({ streamer }) => {
+            Users.find({ accessToken: streamer }).then(data => {
+                if (data.length) {
+                    event.emit('play', { streamer: data[0].login, text: 'Тест' })
+                }
+            })
+        })
 
         socket.on('disconnect', () => {
             console.log('Client disconnect')

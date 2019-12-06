@@ -5,7 +5,8 @@ import axios from 'axios';
 import styled from 'styled-components';
 
 import Button from '../components/Button/Button';
-import Modal from '../components/Modal/Modal';
+import ModalInstruct from '../components/Modals/ModalInstruct';
+import ModalSettings from '../components/Modals/ModalSettings';
 
 const { publicRuntimeConfig } = getConfig()
 
@@ -79,11 +80,12 @@ function getCookie(name) {
       "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
     ));
     return matches ? decodeURIComponent(matches[1]) : undefined;
-  }
+}
 
 const Base = props => {
     const [userState, setUserState] = useState(0);
-    const [showModal, setModal] = useState(false);
+    const [showModalInstruct, setModalInstruct] = useState(false);
+    const [showModalSettings, setModalSettings] = useState(false);
     
     useEffect(() => {
         const accessToken = getCookie('accessToken');
@@ -93,13 +95,15 @@ const Base = props => {
     }, [])
     return (
         <BaseLayout>
-            <Modal__background  style={ { zIndex: showModal ? '100' : '-1' } } onClick={ () => { setModal(false) }}/>
-            <Modal show={ showModal }/>
+            <Modal__background  style={ { zIndex: showModalInstruct || showModalSettings ? '100' : '-1' } } onClick={ () => { setModalInstruct(false); setModalSettings(false); }}/>
+            <ModalInstruct show={ showModalInstruct }/>
+            <ModalSettings show={ showModalSettings }/>
             <ContentBlock>
                 { userState !== 0 ? (
                     <>
                         <Button user={ userState.user_link } text={ userState.display_name  ? ('Добавить бота для канала') : 'Войти с помощью Twitch' } type={ userState.display_name ? 1 : 2 } />
-                        { userState.display_name ? ( <ButtonBlock onClick={ () => { setModal(true) } } > Инструкция </ButtonBlock> ) : ''}
+                        { userState.display_name ? ( <ButtonBlock onClick={ () => { setModalSettings(true) } } > Настройки </ButtonBlock> ) : ''}
+                        { userState.display_name ? ( <ButtonBlock onClick={ () => { setModalInstruct(true) } } > Инструкция </ButtonBlock> ) : ''}
                         { userState.display_name ? ( <Button text="Выйти" type={3} /> ) : ''}
                     </>
                 ) : (

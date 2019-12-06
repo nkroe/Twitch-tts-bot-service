@@ -5,6 +5,10 @@ const Modal__main = styled.div`
   @import url('https://fonts.googleapis.com/css?family=Roboto:100,300,400,500&display=swap');
   width: 800px;
   height: 740px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  text-align: left;
   position: absolute;
   left: calc(50% - 400px);
   top: calc(50% - 370px);
@@ -19,17 +23,14 @@ const Modal__main = styled.div`
   border-radius: 5px;
 `
 
-const Modal = ({ show }) => {
+const ModalInstruct = ({ show }) => {
   return ( 
     <Modal__main style = {{ zIndex: show ? '100' : '-1' }}>
       <p>1. Добавить в OBS новую сцену "Браузер"</p>
       <p>2. В поле "Адрес URL" вставить ссылку, которую получили на сайте при клике на кнопку "Добавить бота для канала"</p>
-      <p>3. Поставить галочку "Перенаправлять аудио в OBS"</p>
-      <p>4. Поставить галочку "Обновлять браузер, когда сцена становится активной"</p>
-      <p>5. Если бот перестает работать нажать на кнопку в OBS "Обновить кэш текущей страницы" (команда !fakecache), либо сообщить разработчику в телеграм - <a href="https://teleg.run/nkroe" style={{ textDecoration: 'none', color: '#fff' }} target="_blank" >@nkroe</a></p>
-      <p>6. Добавить микшер громкости нажав в источниках на добавленную сцену и убрать галочку "Скрыть в микшере"</p>
-      <br/>
-      <p>Если бот в текущий момент не нужен, выключить звук сцены в микшере (п. 6).</p>
+      <p>3. Поставить галочку "Обновлять браузер, когда сцена становится активной"</p>
+      <p>4. Если бот перестает работать нажать на кнопку в OBS "Обновить кэш текущей страницы" (команда !fakecache), либо сообщить разработчику в телеграм - <a href="https://teleg.run/nkroe" style={{ textDecoration: 'none', color: '#fff' }} target="_blank" >@nkroe</a></p>
+      <p>5. Если необходимо выключить бота, можно поставить премиум режим !fakeprem, он доступен только конкретным пользователям и модераторам</p>
       <br/>
       <p>Команды:</p>
       <br/>
@@ -54,4 +55,4 @@ const Modal = ({ show }) => {
    );
 }
  
-export default Modal;
+export default ModalInstruct;
