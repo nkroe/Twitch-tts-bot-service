@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon",
     "build": "next build && tsc && tsc --project tsconfig.server.json",
-    "start": "node .next/server",
+    "start": "node .next/server/src/server",
     "export": "next export",
     "prod": "node server/src/server/index.ts"
   },
