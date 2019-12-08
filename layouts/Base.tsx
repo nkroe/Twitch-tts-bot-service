@@ -98,7 +98,7 @@ const Base = (props: any) => {
             <ModalInstruct show={ showModalInstruct }/>
             <ModalSettings show={ showModalSettings }/>
             <ContentBlock>
-                { userState.user_link ? (
+                { userState.user_link !== '' ? (
                     <>
                         <Button user={ userState.user_link } text={ userState.display_name  ? ('Добавить бота для канала') : 'Войти с помощью Twitch' } type={ userState.display_name ? 1 : 2 } />
                         { userState.display_name ? ( <ButtonBlock onClick={ () => { setModalSettings(true) } } > Настройки </ButtonBlock> ) : ''}
