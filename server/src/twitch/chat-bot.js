@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const event = require('./events');
+const event = require('../../lib/events');
 const getClient = require('./clientHandler');
 const axios = require('axios');
 

@@ -1,9 +1,11 @@
 require('dotenv').config();
 
-const tmi = require('tmi.js');
-const event = require('./events');
+import { getChannelInfo, emitPlay, updateType, updateUsers } from './events';
 
-function getClient(client_channel) {
+import tmi from 'tmi.js';
+import event from '../../lib/events';
+
+export const getClient = (client_channel: any) => {
 
     const opts = {
         options: {
@@ -22,6 +24,7 @@ function getClient(client_channel) {
         ]
     };
 
+    //@ts-ignore
     const client = new tmi.client(opts);
     client.on('message', onMessageHandler);
     client.on('connected', () => {
@@ -29,54 +32,19 @@ function getClient(client_channel) {
     });
     client.connect();
 
-    const getChannelInfo = (chan) => new Promise(res => {
-        event.emit('getInfo', chan);
-        event.on(`getInfoRes-${chan}`, (data) => res(data))
-    })
-
     const creator = 'fake_fake_fake_';
 
-    function onMessageHandler(target, context, msg, self) {
+    function onMessageHandler(target: { slice: any; }, context: { [x: string]: string; username: any; badges?: any; }, msg: string, self: any) {
 
         if (self) return;
 
         msg = msg.replace(/%|🇳🇪|π/gi, '');
         let text = msg.split(' ').slice(1).join(' ');
 
-        const emitPlay = (t) => event.emit('play', {
-            streamer: target.slice(1),
-            text: [...t].filter(w => /([a-zA-Zа-яА-Я0-9+-\s])/gi.test(w)).join('')
-        });
+        getChannelInfo(target.slice(1)).then(channelInfo => {
 
-        const updateUsers = u => {
-            const _type = u ? 2 : 1;
-            event.emit('updateUsers', {
-                channel: target.slice(1),
-                name: context.username,
-                time: Date.now(),
-                type: _type
-            });
-            emitPlay(text);
-        }
-
-        const updateType = (u, message) => {
-            event.emit('updateType', {
-                channel: target.slice(1),
-                type: u
-            });
-            console.log(`На канале ${target.slice(1)} был поставлен режим ${message}`);
-            client.say(target, '@' + context.username + ' Режим переключен');
-        }
-
-        getChannelInfo(target.slice(1)).then(data => {
-
-            let {
-                chan,
-                users,
-                premUsers,
-                muteUsers,
-                type
-            } = data;
+            //@ts-ignore
+            let { chan, users, premUsers, muteUsers, type } = channelInfo;
 
             let badWords = ['пид', 'ниг', 'pid', 'nig'];
             let regWords = new RegExp(badWords.join('|'), 'gi');
@@ -86,47 +54,47 @@ function getClient(client_channel) {
             const isPrem = () => ((context.badges && (context.badges.moderator || context.badges.broadcaster)) || (context.username === creator));
             const isSub = () => ((type === '2') && (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip)));
             const isVip = () => ((type === '3') && (context.badges && context.badges.vip));
-            const isHighlight = () => ((type === '4') && (context['msg-id'] === 'highlighted-message') && ((!muteUsers.map(w => w.name.toLowerCase()).includes(context.username)) || isPrem()));
-            const premMode = () => ((type === '5') && (premUsers.map(w => w.name).includes(context.username.toLowerCase()) || (context.username === creator)));
+            const isHighlight = () => ((type === '4') && (context['msg-id'] === 'highlighted-message') && ((!muteUsers.map((w: { name: { toLowerCase: () => void; }; }) => w.name.toLowerCase()).includes(context.username)) || isPrem()));
+            const premMode = () => ((type === '5') && (premUsers.map((w: { name: any; }) => w.name).includes(context.username.toLowerCase()) || (context.username === creator)));
 
-            let user = users.find(w => w.name === context.username);
+            let user = users.find((w: { name: any; }) => w.name === context.username);
 
             if (isHighlight()) {
                 const t = msg.replace(regWords, '');
-                emitPlay(t)
+                emitPlay(t, target)
             } else
 
             if (/^!fake /gi.test(msg) && (type !== '4')) {
                 if (isPrem()) {
                     if (context.username === creator) {
-                        emitPlay(text);
+                        emitPlay(text, target);
                     } else if (text.length <= 250) {
-                        emitPlay(text);
+                        emitPlay(text, target);
                     }
                 } else {
                     if (premMode()) {
                         const t = text.replace(regWords, '');
-                        emitPlay(t)
+                        emitPlay(t, target)
                     } else 
                     
                     if (
-                        (muteUsers.map(w => w.name.toLowerCase()).includes(context.username)) ||
-                        (regWords.test([...text].filter(w => /([a-zA-Zа-яА-Я0-9+-])/gi.test(w)).join('')) || text.length > (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip) ? 250 : 150)) ||
+                        (muteUsers.map((w: { name: { toLowerCase: () => void; }; }) => w.name.toLowerCase()).includes(context.username)) ||
+                        (regWords.test([...text.split('')].filter(w => /([a-zA-Zа-яА-Я0-9+-])/gi.test(w)).join('')) || text.length > (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip) ? 250 : 150)) ||
                         (user && ((Date.now() / 1000 - user.time / 1000) < (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip) ? 15 : 30)))
                     ) {
                         return;
                     } else
 
                     if (isSub()) {
-                        updateUsers(user)
+                        updateUsers(user, text, target, context)
                     } else
 
                     if (isVip()) {
-                        updateUsers(user)
+                        updateUsers(user, text, target, context)
                     } else
 
                     if (type === '1') {
-                        updateUsers(user)
+                        updateUsers(user, text, target, context)
                     }
                 }
             } else
@@ -141,23 +109,23 @@ function getClient(client_channel) {
 
             if (isPrem()) {
                 if (/^!fakesub$/gi.test(msg)) {
-                    updateType('2', 'сабы и выше');
+                    updateType('2', 'сабы и выше', client, target, context);
                 } else
 
                 if (/^!fakevip$/gi.test(msg)) {
-                    updateType('3', 'випы и выше');
+                    updateType('3', 'випы и выше', client, target, context);
                 } else
 
                 if (/^!fakemsg$/gi.test(msg)) {
-                    updateType('4', 'выделенные сообщения');
+                    updateType('4', 'выделенные сообщения', client, target, context);
                 } else
 
                 if (/^!fakeall$/gi.test(msg)) {
-                    updateType('1', 'всех');
+                    updateType('1', 'всех', client, target, context);
                 } else
 
                 if (/^!fakeprem$/gi.test(msg)) {
-                    updateType('5', 'премиум пользователи');
+                    updateType('5', 'премиум пользователи', client, target, context);
                 } else
 
                 if (/^!skip$/gi.test(msg)) {
@@ -215,5 +183,3 @@ function getClient(client_channel) {
 
     return client;
 }
-
-module.exports = getClient;
