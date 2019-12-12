@@ -285,7 +285,7 @@ app.prepare().then(() => {
     const _server = server.listen(PORT, () => console.log('Server is started :)'))
 
     const { chatBot } = require('../twitch/chat-bot');
-    // const tgBot = require('../telegram/tgBot');
+    const tgBot = require('../telegram/tgBot');
     chatBot();
 
     const io = socketIO(_server);
