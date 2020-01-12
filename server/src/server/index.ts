@@ -80,7 +80,18 @@ app.prepare().then(() => {
     callbackURL: CALLBACK_URL,
     state: true
   },
-    function (accessToken: any, refreshToken: any, profile: { accessToken: string; refreshToken: string; data: any }, done: (arg0: null, arg1: any) => void) {
+    async (accessToken: any, refreshToken: any, profile: { accessToken: string; refreshToken: string; data: any }, done: (arg0: null, arg1: any) => void) => {
+      const countOfFollowers = await axios.get(`https://api.twitch.tv/kraken/channels/${profile.data[0].id}/follows`, {
+        headers: {
+          'Client-ID': FOLLOW_ID,
+          'Accept': 'application/vnd.twitchtv.v5+json'
+        }
+      });
+
+      if (profile.data[0].login !== 'fake_fake_fake_' && (countOfFollowers?.data?._total < 2000)) {
+        done(null, 'followersError');
+      };
+
       profile.accessToken = accessToken;
       profile.refreshToken = refreshToken;
       acc = profile.accessToken;
@@ -171,18 +182,22 @@ app.prepare().then(() => {
     passport.authenticate('twitch', {
       failureRedirect: process.env.FRONT
     }),
-    function (_, res: any) {
-      res.cookie('accessToken', acc, {
-        maxAge: 21600000,
-        httpOnly: false
-      });
-      res.cookie('refreshToken', ref, {
-        maxAge: 21600000,
-        httpOnly: false
-      });
-      setTimeout(_ => {
-        res.redirect(process.env.FRONT);
-      }, 1000);
+    function (req, res: any) {
+      if (req.user === 'followersError') {
+        res.redirect(`${process.env.FRONT}/followersError`);
+      } else {
+        res.cookie('accessToken', acc, {
+          maxAge: 21600000,
+          httpOnly: false
+        });
+        res.cookie('refreshToken', ref, {
+          maxAge: 21600000,
+          httpOnly: false
+        });
+        setTimeout(_ => {
+          res.redirect(process.env.FRONT);
+        }, 1000);
+      }
     }
   );
 
