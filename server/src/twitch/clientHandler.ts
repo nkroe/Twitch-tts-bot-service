@@ -38,11 +38,10 @@ export const getClient = (client_channel: any) => {
 
         if (self) return;
 
-        msg = msg.replace(/%|🇳🇪|π/gi, '');
+        msg = msg.replace(/%|🇳🇪|π/gi, '').replace(/ё/gi, 'е');
         let text = msg.split(' ').slice(1).join(' ');
 
         getChannelInfo(target.slice(1)).then(channelInfo => {
-
             //@ts-ignore
             let { chan, users, premUsers, muteUsers, type } = channelInfo;
 
@@ -52,10 +51,10 @@ export const getClient = (client_channel: any) => {
             if (chan !== target.slice(1)) return;
 
             const isPrem = () => ((context.badges && (context.badges.moderator || context.badges.broadcaster)) || (context.username === creator));
-            const isSub = () => ((type === '2') && (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip)));
-            const isVip = () => ((type === '3') && (context.badges && context.badges.vip));
-            const isHighlight = () => ((type === '4') && (context['msg-id'] === 'highlighted-message') && ((!muteUsers.map((w: { name: { toLowerCase: () => void; }; }) => w.name.toLowerCase()).includes(context.username)) || isPrem()));
-            const premMode = () => ((type === '5') && (premUsers.map((w: { name: any; }) => w.name).includes(context.username.toLowerCase()) || (context.username === creator)));
+            const isSub = () => ((type === 2) && (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip)));
+            const isVip = () => ((type === 3) && (context.badges && context.badges.vip));
+            const isHighlight = () => ((type === 4) && (context['msg-id'] === 'highlighted-message') && ((!muteUsers.map((w: { name: { toLowerCase: () => void; }; }) => w.name.toLowerCase()).includes(context.username)) || isPrem()));
+            const premMode = () => ((type === 5) && (premUsers.map((w: { name: any; }) => w.name).includes(context.username.toLowerCase()) || (context.username === creator)));
 
             let user = users.find((w: { name: any; }) => w.name === context.username);
 
@@ -64,7 +63,7 @@ export const getClient = (client_channel: any) => {
                 emitPlay(t, target)
             } else
 
-            if (/^!fake /gi.test(msg) && (type !== '4')) {
+            if (/^!fake /gi.test(msg) && (type !== 4)) {
                 if (isPrem()) {
                     if (context.username === creator) {
                         emitPlay(text, target);
@@ -93,7 +92,7 @@ export const getClient = (client_channel: any) => {
                         updateUsers(user, text, target, context)
                     } else
 
-                    if (type === '1') {
+                    if (type === 1) {
                         updateUsers(user, text, target, context)
                     }
                 }
@@ -109,23 +108,23 @@ export const getClient = (client_channel: any) => {
 
             if (isPrem()) {
                 if (/^!fakesub$/gi.test(msg)) {
-                    updateType('2', 'сабы и выше', client, target, context);
+                    updateType(2, 'сабы и выше', client, target, context);
                 } else
 
                 if (/^!fakevip$/gi.test(msg)) {
-                    updateType('3', 'випы и выше', client, target, context);
+                    updateType(3, 'випы и выше', client, target, context);
                 } else
 
                 if (/^!fakemsg$/gi.test(msg)) {
-                    updateType('4', 'выделенные сообщения', client, target, context);
+                    updateType(4, 'выделенные сообщения', client, target, context);
                 } else
 
                 if (/^!fakeall$/gi.test(msg)) {
-                    updateType('1', 'всех', client, target, context);
+                    updateType(1, 'всех', client, target, context);
                 } else
 
                 if (/^!fakeprem$/gi.test(msg)) {
-                    updateType('5', 'премиум пользователи', client, target, context);
+                    updateType(5, 'премиум пользователи', client, target, context);
                 } else
 
                 if (/^!skip$/gi.test(msg)) {

@@ -23,7 +23,7 @@ const ButtonBlock = styled.div`
     }
 `
 
-const buttonHandler = (type: any, user: any = '') => {
+const buttonHandler = (type: number, user: string = '') => {
     if (type === 1) {
         location.href = location.origin + '/' + user;
     } else if (type === 2) {
@@ -33,9 +33,9 @@ const buttonHandler = (type: any, user: any = '') => {
     }
 }
 
-const Button = (props: any) => 
-    (<ButtonBlock onClick={() => buttonHandler(props.type, props.user)}>
-        {props.text}
+const Button = ({ type, user, text }: { type: number; user?: string; text: string; }) => 
+    (<ButtonBlock onClick={() => buttonHandler(type, user)}>
+        {text}
     </ButtonBlock>)
 
 export default Button;

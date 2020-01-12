@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import io from 'socket.io-client';
 import getConfig from 'next/config';
@@ -35,26 +35,25 @@ const Modal__main = styled.div`
 `
 
 const ButtonBlock = styled.div`
-    align-self: center;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
-    width: 240px;
-    height: 60px;
-    background: #4b367c;
-    color: #fff;
-    user-select: none;
-    margin: 10px;
-    transition: 0.2s;
-    box-shadow: 3px 3px 0 3px #282235;
-    font-size: 14px;
-    cursor: pointer;
-    font-family: 'Roboto', sans-serif;
-
-    &:hover {
-        box-shadow: 1px 1px 0 1px #282235;
-    }
+  align-self: center;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  width: 240px;
+  height: 60px;
+  background: #4b367c;
+  color: #fff;
+  user-select: none;
+  margin: 10px;
+  transition: 0.2s;
+  box-shadow: 3px 3px 0 3px #282235;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: 'Roboto', sans-serif;
+  &:hover {
+    box-shadow: 1px 1px 0 1px #282235;
+  }
 `
 
 const Input = styled.input`
@@ -88,19 +87,17 @@ const SpanSpoiler = styled.span`
 `
 
 const ModalSettings = ({ show }: any) => {
-
-  let input: React.RefObject<HTMLInputElement> = React.createRef()
+  const [inputValue, setInputValue] = useState('');
 
   const socket = io(publicRuntimeConfig.BACK);
 
   const checkVolume = (a: string) => a.match(/^-?([0-9]){0,2}(\.([0-9]){1})?$/gi)
 
   const sendData = () => {
-    const volume = input.current;
     const streamer = getCookie('accessToken')
-    if (checkVolume(volume!.value)) {
-      socket.emit('setVolume', ({ streamer, volume: volume!.value }))
-      volume!.value = '';
+    if (checkVolume(inputValue)) {
+      socket.emit('setVolume', ({ streamer, volume: Number(inputValue) }))
+      setInputValue('');
     } else {
       alert('Bad volume')
     }
@@ -116,7 +113,7 @@ const ModalSettings = ({ show }: any) => {
       <Span>
         Введите значение от -96.0 до 16.0 (оптимальные значения от -6 до 6)
       </Span>
-      <Input ref={input} type="text" placeholder="Значение громкости" />
+      <Input onChange={e => setInputValue(e.target.value)} value={inputValue} type="text" placeholder="Значение громкости" />
       <ButtonBlock onClick={() => { sendData() }}>
         Сохранить
       </ButtonBlock>
@@ -124,7 +121,7 @@ const ModalSettings = ({ show }: any) => {
         Тест
       </ButtonBlock>
       <SpanSpoiler>
-        Для теста необходимо открыть свою ссылку, либо добавить ее на стрим
+        Для теста необходимо открыть свою ссылку, либо добавить её в ОБС
       </SpanSpoiler>
     </Modal__main>
   );

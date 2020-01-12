@@ -1,11 +1,5 @@
 import Base from '../layouts/Base';
 
-const Index = () => {
-    return (
-        <Base>
-            
-        </Base>
-    )
-}
+const Index = () => <Base></Base>
 
 export default Index;
