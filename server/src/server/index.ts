@@ -90,6 +90,7 @@ app.prepare().then(() => {
 
       if (profile.data[0].login !== 'fake_fake_fake_' && (countOfFollowers?.data?._total < 2000)) {
         done(null, 'followersError');
+        return;
       };
 
       profile.accessToken = accessToken;
