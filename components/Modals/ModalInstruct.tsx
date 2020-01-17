@@ -11,7 +11,7 @@ const Modal__main = styled.div`
   text-align: left;
   position: absolute;
   left: calc(50% - 400px);
-  top: calc(50% - 370px);
+  top: calc(50% - 400px);
   background: #3b2c5e;
   word-wrap: none;
   padding: 15px;
