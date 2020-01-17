@@ -4,26 +4,22 @@ import passport from 'passport';
 import request from 'request';
 import axios from 'axios';
 import socketIO from 'socket.io';
-import fetch from 'node-fetch';
-const OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
-
 import event from '../../lib/events';
 import { createDate } from '../../lib/createDate';
-import { createUUID } from '../../lib/createUUID';
-
-import { Users } from '../../models/users';
-import { Settings } from '../../models/settings'
-
+import { Users, DBUser } from '../../models/users';
+import { Settings, DBSettings } from '../../models/settings'
 import {
-  reloadCacheHandler, getInfoHandler, skipHandler,
+  play, reloadCacheHandler, getInfoHandler, skipHandler,
   muteHandler, unmuteHandler, updateUsersHandler,
   updateTypeHandler, setpremHandler, unpremHandler
 } from '../eventHandlers';
 import { startDb } from './startDb';
-import { CharsStats } from '../charsStats';
 import { startUpdateStats } from './updateStats';
 import { app, handle } from './getApp';
 import { createServer } from './getServer';
+import { followChannel } from './followChannel';
+import { getNewUser } from './getNewUser';
+const OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
 
 const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID;
 const TWITCH_SECRET = process.env.TWITCH_SECRET;
@@ -31,16 +27,9 @@ const SESSION_SECRET = process.env.SESSION_SECRET;
 const CALLBACK_URL = `${process.env.BACK}/api/auth/twitch/callback`;
 const PORT = process.env.PORT || 8080;
 const FOLLOW_ID = process.env.FOLLOW_ID;
-const FOLLOW_SECRET = process.env.FOLLOW_SECRET;
 
 startDb();
 startUpdateStats();
-
-let acc = '';
-let ref = '';
-let paidUsers = ['fake_fake_fake_', 'milkyzmey', 'dedsempai', 'lekartv', 'lazyb0nes'];
-
-const rand = (min: number, max: number) => Math.round(min - 0.5 + Math.random() * (max - min + 1));
 
 app.prepare().then(() => {
   const server = createServer();
@@ -81,85 +70,36 @@ app.prepare().then(() => {
     callbackURL: CALLBACK_URL,
     state: true
   },
-    async (accessToken: any, refreshToken: any, profile: { accessToken: string; refreshToken: string; data: any }, done: (arg0: null, arg1: any) => void) => {
-      const countOfFollowers = await axios.get(`https://api.twitch.tv/kraken/channels/${profile.data[0].id}/follows`, {
-        headers: {
-          'Client-ID': FOLLOW_ID,
-          'Accept': 'application/vnd.twitchtv.v5+json'
-        }
-      });
-
-      if (!paidUsers.includes(profile.data[0].login) && (countOfFollowers?.data?._total < 5000)) {
-        done(null, 'followersError');
-        return;
-      };
-
+    (accessToken: any, refreshToken: any, profile: { accessToken: string; refreshToken: string; data: any }, done: (arg0: null, arg1: any) => void) => {
       profile.accessToken = accessToken;
       profile.refreshToken = refreshToken;
-      acc = profile.accessToken;
-      ref = profile.refreshToken;
-      const getUser = new Users({
-        accessToken: profile.accessToken,
-        refreshToken: profile.refreshToken,
-        user_id: profile.data[0].id,
-        login: profile.data[0].login,
-        display_name: profile.data[0].display_name,
-        image: profile.data[0].profile_image_url,
-        user_link: createUUID(),
-        last_signin: createDate(),
-        users: [],
-        muteUsers: [],
-        premUsers: [],
-        type: 4,
-        stats: 0
-      });
-      Users.find({
-        "user_id": profile.data[0].id
-      }).then((data: { length: number; }) => {
-        if (data.length === 0) {
-          getUser.save().then(() => {
-            let count = 0;
-            const followChannel = (c: number) => {
-              Settings.find({
-                secret: SESSION_SECRET
-              }).then((_settings: any) => {
-                if (_settings.length) {
-                  if (c <= 1) {
-                    axios.put(`https://api.twitch.tv/kraken/users/464971806/follows/channels/${profile.data[0].id}`, '', {
-                      headers: {
-                        'Authorization': `OAuth ${_settings[0].accessToken}`,
-                        'Client-ID': FOLLOW_ID,
-                        'Accept': 'application/vnd.twitchtv.v5+json'
-                      }
-                    }).then(() => '').catch((e: { response: { data: any; }; }) => {
-                      console.log(e.response.data)
-                      axios.post(`https://id.twitch.tv/oauth2/token?grant_type=refresh_token&refresh_token=${_settings[0].refreshToken}&client_id=${FOLLOW_ID}&client_secret=${FOLLOW_SECRET}`).then((_refresh: { data: { access_token: any; refresh_token: any; }; }) => {
-                        Settings.updateOne({
-                          secret: SESSION_SECRET
-                        }, {
-                          $set: {
-                            "accessToken": _refresh.data.access_token,
-                            "refreshToken": _refresh.data.refresh_token
-                          }
-                        }).then(() => {
-                          count++;
-                          setTimeout(() => {
-                            followChannel(count);
-                          }, 1000)
-                        });
-                      }).catch((e: { response: { data: any; }; }) => console.log(e.response.data))
-                    });
-                  }
+
+      Users.findOne({ "user_id": profile.data[0].id }).then((user: DBUser | null) => {
+        if (!user) {
+          Settings.findOne({ secret: SESSION_SECRET }).then(async (settings: DBSettings | null) => {
+            if (settings) {
+              const countOfFollowers = await axios.get(`https://api.twitch.tv/kraken/channels/${profile.data[0].id}/follows`, {
+                headers: {
+                  'Client-ID': FOLLOW_ID,
+                  'Accept': 'application/vnd.twitchtv.v5+json'
                 }
               });
+    
+              if (!settings.paidUsers.includes(profile.data[0].login) && (countOfFollowers?.data?._total < 5000)) {
+                done(null, 'followersError');
+                return;
+              };
+    
+              const newUser = getNewUser(profile);
+    
+              newUser.save().then(() => {
+                followChannel(0, profile.data[0].id);
+                event.emit('addChannel', profile.data[0].login);
+              })
             }
-            followChannel(count);
-            event.emit('addChannel', profile.data[0].login);
-          })
+          });
         } else {
-          Users.updateOne({
-            "user_id": profile.data[0].id
-          }, {
+          Users.updateOne({ "user_id": profile.data[0].id }, {
             $set: {
               "accessToken": profile.accessToken,
               "refreshToken": profile.refreshToken,
@@ -176,9 +116,7 @@ app.prepare().then(() => {
       done(null, profile);
     }));
 
-  server.get('/api/auth/twitch', passport.authenticate('twitch', {
-    scope: 'user_read'
-  }));
+  server.get('/api/auth/twitch', passport.authenticate('twitch', { scope: 'user_read' }));
 
   server.get('/api/auth/twitch/callback',
     passport.authenticate('twitch', {
@@ -188,11 +126,13 @@ app.prepare().then(() => {
       if (req.user === 'followersError') {
         res.redirect(`${process.env.FRONT}/followersError`);
       } else {
-        res.cookie('accessToken', acc, {
+        //@ts-ignore
+        const { accessToken, refreshToken } = req.user;
+        res.cookie('accessToken', accessToken, {
           maxAge: 21600000,
           httpOnly: false
         });
-        res.cookie('refreshToken', ref, {
+        res.cookie('refreshToken', refreshToken, {
           maxAge: 21600000,
           httpOnly: false
         });
@@ -203,8 +143,7 @@ app.prepare().then(() => {
     }
   );
 
-  server.get('/api/logout',
-    function (req: { logout: () => void; }, res: any) {
+  server.get('/api/logout', (req: { logout: () => void; }, res: any) => {
       req.logout();
       res.clearCookie('accessToken');
       res.clearCookie('refreshToken');
@@ -213,11 +152,9 @@ app.prepare().then(() => {
   );
 
   server.get('/api/getUser/:accessToken', function (req: { params: { accessToken: any; }; }, res: { send: { (arg0: any): void; (arg0: { status: string; }): void; }; }) {
-    Users.find({
-      accessToken: req.params.accessToken
-    }).then((data: any[]) => {
-      if (data.length) {
-        res.send(data[0]);
+    Users.findOne({ accessToken: req.params.accessToken }).then((user: DBUser | null) => {
+      if (user) {
+        res.send(user);
       } else {
         res.send({
           status: 'error'
@@ -257,53 +194,7 @@ app.prepare().then(() => {
 
   const io = socketIO(_server);
 
-  event.on('play', ({
-    streamer,
-    text
-  }) => {
-    Users.findOne({
-      login: streamer
-    }).then(user => {
-      if (!user) return;
-
-      Settings.findOne({
-        secret: SESSION_SECRET
-      }).then(setting => {
-
-        if (!setting) return;
-
-        const body = {
-          "input": {
-            "text": text
-          },
-          "voice": {
-            "languageCode": "ru-RU",
-            "name": ['ru-RU-Wavenet-A', 'ru-RU-Wavenet-D'][rand(0, 1)]
-          },
-          "audioConfig": {
-            "audioEncoding": "OGG_OPUS",
-            "volumeGainDb": user.volume || 0
-          }
-        };
-
-        fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${setting.apiKey}`, {
-          method: 'post',
-          body: JSON.stringify(body),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }).then(res => {
-          res.json().then(jsonData => {
-            CharsStats.addStat(streamer, text.length);
-            io.emit(`play-${user.user_link}`, jsonData.audioContent)
-          });
-        }).catch(e => {
-          console.log(`На канале ${streamer} не было прочитано сообщение: ${text}`)
-          console.log(e);
-        })
-      })
-    })
-  });
+  event.on('play', play({ io }));
 
   event.on('skip', skipHandler({ io }))
 

@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 
-type DBUser = mongoose.Document & {
+export type DBUser = mongoose.Document & {
   id: string,
   accessToken: string,
   refreshToken: string,

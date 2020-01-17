@@ -1,10 +1,11 @@
 import mongoose, { Schema } from 'mongoose';
 
-type DBSettings = mongoose.Document & {
+export type DBSettings = mongoose.Document & {
   accessToken: string,
   refreshToken: string,
   secret: string,
-  apiKey: string
+  apiKey: string,
+  paidUsers: string[]
 }
 
 const Setting = new Schema(
@@ -12,7 +13,8 @@ const Setting = new Schema(
     accessToken: String,
     refreshToken: String,
     secret: String,
-    apiKey: String
+    apiKey: String,
+    paidUsers: Array
   }
 )
 

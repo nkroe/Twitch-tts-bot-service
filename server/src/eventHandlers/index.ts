@@ -1,3 +1,4 @@
+export * from './play';
 export * from './reloadCache';
 export * from './getInfo';
 export * from './mute';
