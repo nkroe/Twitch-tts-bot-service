@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 import copy from 'copy-to-clipboard';
+//@ts-ignore
+import { NotifyHandler } from 'react-notification-component';
 
 const ButtonBlock = styled.div`
   display: flex;
@@ -27,6 +29,11 @@ const ButtonBlock = styled.div`
 const buttonHandler = (type: number, user: string = '') => {
   if (type === 1) {
     copy(`${location.origin}/${user}`);
+    NotifyHandler.add("Скопировано", "", {}, {
+        mainBackground: '#4b367c',
+        mainBackgroundHover: '#4f3a81',
+        styleProgress: { background: '#634a9c' }
+      });
   } else if (type === 2) {
     location.href = location.origin + '/api/auth/twitch';
   } else if (type === 3) {

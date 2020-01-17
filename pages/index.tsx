@@ -6,6 +6,8 @@ import styled from 'styled-components';
 import Button from '../components/Button/Button';
 import ModalInstruct from '../components/Modals/ModalInstruct';
 import ModalSettings from '../components/Modals/ModalSettings';
+//@ts-ignore
+import { NotifyComponent } from 'react-notification-component';
 
 const { publicRuntimeConfig } = getConfig()
 
@@ -97,6 +99,7 @@ const Index = () => {
       ) : (
           <Loading>Loading</Loading>
         )}
+        <NotifyComponent />
     </Base>
   )
 }
