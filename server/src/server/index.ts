@@ -38,7 +38,7 @@ startUpdateStats();
 
 let acc = '';
 let ref = '';
-let paidUsers = ['fake_fake_fake_', 'milkyzmey'];
+let paidUsers = ['fake_fake_fake_', 'milkyzmey', 'dedsempai', 'lekartv', 'lazyb0nes'];
 
 const rand = (min: number, max: number) => Math.round(min - 0.5 + Math.random() * (max - min + 1));
 
@@ -89,7 +89,7 @@ app.prepare().then(() => {
         }
       });
 
-      if (!paidUsers.includes(profile.data[0].login) && (countOfFollowers?.data?._total < 2000)) {
+      if (!paidUsers.includes(profile.data[0].login) && (countOfFollowers?.data?._total < 5000)) {
         done(null, 'followersError');
         return;
       };

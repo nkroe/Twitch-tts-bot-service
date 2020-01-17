@@ -14,7 +14,7 @@ const Div = styled.div`
 const FollowersError = () =>
   <Base>
     <Div>
-      <span style={{ alignSelf: 'center', margin: '4px' }}>Твое количество фолловеров должно быть больше 2000</span>
+      <span style={{ alignSelf: 'center', margin: '4px' }}>Твое количество фолловеров должно быть больше 5000</span>
       <span style={{ alignSelf: 'center', margin: '4px' }}>Для получения платного доступа (200 руб.) напиши разработчику в</span>
       <a href="https://vk.com/nikitakroe" style={{ textDecoration: 'none', color: '#fff', fontSize: '22px', alignSelf: 'center', margin: '4px' }} target="_blank">VK</a>
     </Div>
