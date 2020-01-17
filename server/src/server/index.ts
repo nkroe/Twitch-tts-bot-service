@@ -38,6 +38,7 @@ startUpdateStats();
 
 let acc = '';
 let ref = '';
+let paidUsers = ['fake_fake_fake_', 'milkyzmey'];
 
 const rand = (min: number, max: number) => Math.round(min - 0.5 + Math.random() * (max - min + 1));
 
@@ -88,7 +89,7 @@ app.prepare().then(() => {
         }
       });
 
-      if (profile.data[0].login !== 'fake_fake_fake_' && (countOfFollowers?.data?._total < 2000)) {
+      if (!paidUsers.includes(profile.data[0].login) && (countOfFollowers?.data?._total < 2000)) {
         done(null, 'followersError');
         return;
       };

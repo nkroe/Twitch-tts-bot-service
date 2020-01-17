@@ -89,7 +89,7 @@ const Index = () => {
       <ModalSettings show={showModalSettings} />
       {!loading ? (
         <>
-          <Button user={userState.user_link} text={userState.display_name ? ('Добавить бота для канала') : 'Войти с помощью Twitch'} type={userState.display_name ? 1 : 2} />
+          <Button user={userState.user_link} text={userState.display_name ? ('Получить ссылку') : 'Войти с помощью Twitch'} type={userState.display_name ? 1 : 2} />
           {userState.display_name ? (<ButtonBlock onClick={() => { setModalSettings(true) }} > Настройки </ButtonBlock>) : ''}
           {userState.display_name ? (<ButtonBlock onClick={() => { setModalInstruct(true) }} > Инструкция </ButtonBlock>) : ''}
           {userState.display_name ? (<Button text="Выйти" type={3} />) : ''}

@@ -27,9 +27,9 @@ const ModalInstruct = ({ show }: any) => {
   return ( 
     <Modal__main style = {{ zIndex: show ? 100 : -1 }}>
       <p>1. Добавить в OBS новую сцену "Браузер"</p>
-      <p>2. В поле "Адрес URL" вставить ссылку, которую получили на сайте при клике на кнопку "Добавить бота для канала"</p>
+      <p>2. В поле "Адрес URL" вставить ссылку, которую получили при клике на кнопку "Получить ссылку" (она будет скопирована в буфер обмена)</p>
       <p>3. Поставить галочку "Обновлять браузер, когда сцена становится активной"</p>
-      <p>4. Если бот перестает работать нажать на кнопку в OBS "Обновить кэш текущей страницы" (команда !fakecache), либо сообщить разработчику в телеграм - <a href="https://teleg.run/nkroe" style={{ textDecoration: 'none', color: '#fff' }} target="_blank" >@nkroe</a></p>
+      <p>4. Если бот перестает работать нажать на кнопку в OBS "Обновить кэш текущей страницы" (команда !fakecache), либо сообщить разработчику в ВК - <a href="https://vk.com/nikitakroe" style={{ textDecoration: 'none', color: '#fff' }} target="_blank" >VK</a></p>
       <p>5. Если необходимо выключить бота, можно поставить премиум режим !fakeprem, он доступен только конкретным пользователям и модераторам</p>
       <br/>
       <p>Команды:</p>
@@ -52,8 +52,8 @@ const ModalInstruct = ({ show }: any) => {
       <p>Ограничения - ансабы 150 символов и сообщение раз в 30 секунд &nbsp; || &nbsp; сабы/випы/модеры - 250 символов и сообщение раз в 15 секунд</p>
       <p><strong>Ограничений в режиме выделенных сообщений нет</strong></p>
       <br/>
-      <p>Если вы заметили баг/недоработку/есть предложения - можете сообщить разработчику в телеграм - <a href="https://teleg.run/nkroe" style={{ textDecoration: 'none', color: '#fff' }}>@nkroe</a></p>
-      <p><a href="https://www.donationalerts.com/r/fake_fake_fake_" style={{ textDecoration: 'none', color: '#fff' }} target="_blank" >Поддержать/отблагодарить разработчика donationalerts</a></p>
+      <p>Если вы заметили баг/недоработку/есть предложения - можете сообщить разработчику в ВК - <a href="https://vk.com/nikitakroe" style={{ textDecoration: 'none', color: '#fff' }} target="_blank">VK</a></p>
+      <p><a href="https://www.donationalerts.com/r/fake_fake_fake_" style={{ textDecoration: 'none', color: '#fff' }} target="_blank">Поддержать/отблагодарить - donationalerts</a></p>
     </Modal__main>
    );
 }
