@@ -28,7 +28,7 @@ export const getClient = (client_channel: any) => {
     const client = new tmi.client(opts);
     client.on('message', onMessageHandler);
     client.on('connected', () => {
-        console.log('Chat bot is ready!')
+        console.log(`${client_channel} is ready!`)
     });
     client.connect();
 
