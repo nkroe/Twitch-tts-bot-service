@@ -93,9 +93,9 @@ app.prepare().then(() => {
               const newUser = getNewUser(profile);
     
               newUser.save().then(() => {
+                done(null, profile);
                 followChannel(0, profile.data[0].id);
                 event.emit('addChannel', profile.data[0].login);
-                done(null, profile);
               })
             }
           });
