@@ -128,17 +128,21 @@ app.prepare().then(() => {
       } else {
         //@ts-ignore
         const { accessToken, refreshToken } = req.user;
-        res.cookie('accessToken', accessToken, {
-          maxAge: 21600000,
-          httpOnly: false
-        });
-        res.cookie('refreshToken', refreshToken, {
-          maxAge: 21600000,
-          httpOnly: false
-        });
-        setTimeout(_ => {
-          res.redirect(process.env.FRONT);
-        }, 1000);
+        try {
+          res.cookie('accessToken', accessToken, {
+            maxAge: 21600000,
+            httpOnly: false
+          });
+          res.cookie('refreshToken', refreshToken, {
+            maxAge: 21600000,
+            httpOnly: false
+          });
+          setTimeout(_ => {
+            res.redirect(process.env.FRONT);
+          }, 1000);
+        } catch (e) {
+          console.log(`Callback set cookie: ${e.message}`);
+        }
       }
     }
   );
