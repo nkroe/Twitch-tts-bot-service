@@ -95,6 +95,7 @@ app.prepare().then(() => {
               newUser.save().then(() => {
                 followChannel(0, profile.data[0].id);
                 event.emit('addChannel', profile.data[0].login);
+                done(null, profile);
               })
             }
           });
@@ -109,11 +110,11 @@ app.prepare().then(() => {
               "last_signin": createDate(),
             }
           }).then(() => {
+            done(null, profile);
             console.log('Update done');
           })
         }
       });
-      done(null, profile);
     }));
 
   server.get('/api/auth/twitch', passport.authenticate('twitch', { scope: 'user_read' }));
