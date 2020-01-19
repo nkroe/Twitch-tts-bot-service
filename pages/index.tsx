@@ -86,7 +86,7 @@ const Index = () => {
 
   return (
     <Base>
-      <Modal__background style={{ zIndex: showModalInstruct || showModalSettings ? 100 : -1 }} onClick={() => { setModalInstruct(false); setModalSettings(false); }} />
+      <Modal__background style={{ zIndex: showModalInstruct || showModalSettings ? 100 : -1, display: showModalInstruct || showModalSettings ? 'block' : 'none' }} onClick={() => { setModalInstruct(false); setModalSettings(false); }} />
       <ModalInstruct show={showModalInstruct} />
       <ModalSettings show={showModalSettings} />
       {!loading ? (

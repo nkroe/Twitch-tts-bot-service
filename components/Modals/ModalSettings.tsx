@@ -109,7 +109,7 @@ const ModalSettings = ({ show }: any) => {
   }
 
   return (
-    <Modal__main style={{ zIndex: show ? 100 : -1 }}>
+    <Modal__main style={{ zIndex: show ? 100 : -1, display: show ? 'flex' : 'none' }}>
       <Span>
         Введите значение от -96.0 до 16.0 (оптимальные значения от -6 до 6)
       </Span>

@@ -25,7 +25,7 @@ const Modal__main = styled.div`
 
 const ModalInstruct = ({ show }: any) => {
   return ( 
-    <Modal__main style = {{ zIndex: show ? 100 : -1 }}>
+    <Modal__main style = {{ zIndex: show ? 100 : -1, display: show ? 'flex' : 'none' }}>
       <p>1. Добавить в OBS новую сцену "Браузер"</p>
       <p>2. В поле "Адрес URL" вставить ссылку, которую получили при клике на кнопку "Получить ссылку" (она будет скопирована в буфер обмена)</p>
       <p>3. Поставить галочку "Обновлять браузер, когда сцена становится активной"</p>
