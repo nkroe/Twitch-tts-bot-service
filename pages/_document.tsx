@@ -35,6 +35,7 @@ export default class MyDocument extends Document<CustomInputProps> {
     return (
       <html>
         <Head>
+            <link rel="shortcut icon" href="/static/favicon.ico" />
             <style dangerouslySetInnerHTML={globalStyle} />
             {this.props.styleTags}
         </Head>

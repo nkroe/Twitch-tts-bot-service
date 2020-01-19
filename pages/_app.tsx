@@ -20,7 +20,7 @@ export default class MyApp extends App {
     return (
       <>
         <Head>
-          <title>Twitch tts bot service</title>
+          <title>FAKEBOT</title>
         </Head>
         <Component {...pageProps} />
       </>
