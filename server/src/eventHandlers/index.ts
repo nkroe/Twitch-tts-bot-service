@@ -8,3 +8,5 @@ export * from './setprem';
 export * from './unprem';
 export * from './updateType';
 export * from './updateUsers';
+export * from './fakeon';
+export * from './fakeoff';

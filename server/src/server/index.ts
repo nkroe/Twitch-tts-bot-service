@@ -6,7 +6,8 @@ import { Users } from '../../models/users';
 import {
   play, reloadCacheHandler, getInfoHandler, skipHandler,
   muteHandler, unmuteHandler, updateUsersHandler,
-  updateTypeHandler, setpremHandler, unpremHandler
+  updateTypeHandler, setpremHandler, unpremHandler,
+  fakeon, fakeoff
 } from '../eventHandlers';
 import { startDb } from './startDb';
 import { startUpdateStats } from './updateStats';
@@ -38,6 +39,8 @@ app.prepare().then(() => {
 
   event.on('play', play({ io }));
   event.on('skip', skipHandler({ io }))
+  event.on('fakeon', fakeon({}))
+  event.on('fakeoff', fakeoff({}))
   event.on('reloadCache', reloadCacheHandler({ io }));
   event.on('mute', muteHandler({}));
   event.on('unmute', unmuteHandler({}))

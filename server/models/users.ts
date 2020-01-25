@@ -15,7 +15,8 @@ export type DBUser = mongoose.Document & {
   premUsers: { name: string }[],
   type: number,
   stats: number,
-  volume: string
+  volume: string,
+  fakeOn: boolean
 }
 
 const User = new Schema(
@@ -34,7 +35,8 @@ const User = new Schema(
     premUsers: Array,
     type: Number,
     stats: Number,
-    volume: String
+    volume: String,
+    fakeOn: Boolean
   }
 )
 
