@@ -101,7 +101,7 @@ export const getApi = (server: Express, passport: any) => {
     }
 
     const MerchantLogin = 'fakebot';
-    const OutSum = '200.00';
+    const OutSum = '200';
     const InvId = `${user.user_id}`;
     const Description = 'Fakebot 1 месяц';
     const pass1 = settings.roboPass1;
@@ -109,16 +109,39 @@ export const getApi = (server: Express, passport: any) => {
     res.redirect(`https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=${MerchantLogin}&Description=${Description}&OutSum=${OutSum}&InvoiceID=${InvId}&SignatureValue=${SignatureValue}&IsTest=1`);
   })
 
-  server.post('/api/payment/callback', (req: any, res: any) => {
-    console.log(req)
-
+  server.get('/api/payment/callback', async (req: any, res: any) => {
     res.send('Ok');
   })
 
-  server.get('/api/payment/callback', (req: any, res: any) => {
-    console.log(req)
+  server.post('/api/payment/success', async (req: any, res: any) => {
+    const settings = await Settings.findOne({ secret: SESSION_SECRET })
 
-    res.send('Ok');
+    if (!settings) {
+      res.redirect(`${FRONT}`);
+      return;
+    }
+
+    const MerchantLogin = 'fakebot';
+    const OutSum = '200';
+    const pass1 = settings.roboPass1;
+    const { InvId, SignatureValue } = req.body;
+
+    const sign = md5(`${MerchantLogin}:${OutSum}:${InvId}:${pass1}`)
+    const sign2 = md5(`${OutSum}:${InvId}:${pass1}`)
+    console.log(sign);
+    console.log(sign2);
+    console.log(SignatureValue);
+
+    if (sign !== SignatureValue) {
+      res.send('Error');
+      return;
+    }
+
+    Users.findOneAndUpdate({ user_id: InvId }, {
+      isPayed: true
+    }).then(() => {
+      res.redirect(`${FRONT}`);
+    })
   })
 
   server.get('*', (req: any, res: any) => {

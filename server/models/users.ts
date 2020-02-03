@@ -16,7 +16,8 @@ export type DBUser = mongoose.Document & {
   type: number,
   stats: number,
   volume: string,
-  fakeOn: boolean
+  fakeOn: boolean,
+  isPayed: boolean
 }
 
 const User = new Schema(
@@ -36,7 +37,8 @@ const User = new Schema(
     type: Number,
     stats: Number,
     volume: String,
-    fakeOn: Boolean
+    fakeOn: Boolean,
+    isPayed: Boolean
   }
 )
 
