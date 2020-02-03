@@ -115,6 +115,12 @@ export const getApi = (server: Express, passport: any) => {
     res.send('Ok');
   })
 
+  server.get('/api/payment/callback', (req: any, res: any) => {
+    console.log(req)
+
+    res.send('Ok');
+  })
+
   server.get('*', (req: any, res: any) => {
     return handle(req, res)
   })
