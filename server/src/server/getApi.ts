@@ -1,17 +1,23 @@
 import { Users, DBUser } from "../../models/users";
 import { handle } from "./getApp";
 import { Express } from "express";
+//@ts-ignore
+import md5 from 'md5';
+import { Settings } from "../../models/settings";
+
+const SESSION_SECRET = process.env.SESSION_SECRET;
+const FRONT = process.env.FRONT;
 
 export const getApi = (server: Express, passport: any) => {
   server.get('/api/auth/twitch', passport.authenticate('twitch', { scope: 'user_read' }));
 
   server.get('/api/auth/twitch/callback',
     passport.authenticate('twitch', {
-      failureRedirect: process.env.FRONT
+      failureRedirect: FRONT
     }),
     function (req, res: any) {
       if (req.user === 'followersError') {
-        res.redirect(`${process.env.FRONT}/followersError`);
+        res.redirect(`${FRONT}/followersError`);
       } else {
         //@ts-ignore
         const { accessToken, refreshToken } = req.user;
@@ -25,7 +31,7 @@ export const getApi = (server: Express, passport: any) => {
             httpOnly: false
           });
           setTimeout(_ => {
-            res.redirect(process.env.FRONT);
+            res.redirect(FRONT);
           }, 1000);
         } catch (e) {
           console.log(`Callback set cookie: ${e.message}`);
@@ -38,7 +44,7 @@ export const getApi = (server: Express, passport: any) => {
       req.logout();
       res.clearCookie('accessToken');
       res.clearCookie('refreshToken');
-      res.redirect(process.env.FRONT);
+      res.redirect(FRONT);
     }
   );
 
@@ -55,7 +61,7 @@ export const getApi = (server: Express, passport: any) => {
   });
 
   server.get('/api/getAllUsers/:secret', function (req: { params: { secret: string | undefined; }; }, res: any) {
-    if (req.params.secret === process.env.SESSION_SECRET) {
+    if (req.params.secret === SESSION_SECRET) {
       Users.find().then((data: { length: any; map: (arg0: (w: any) => any) => void; }) => {
         if (data.length) {
           res.send(data.map((w: { login: any; }) => w.login));
@@ -71,6 +77,43 @@ export const getApi = (server: Express, passport: any) => {
       })
     }
   });
+
+  server.get('/api/payment/1', async (req: any, res: any) => {
+    const { accessToken } = req.cookies;
+
+    if (!accessToken) {
+      res.redirect(`${FRONT}/api/auth/twitch`);
+      return;
+    }
+
+    const user = await Users.findOne({ accessToken });
+
+    if (!user) {
+      res.redirect(`${FRONT}`);
+      return;
+    }
+
+    const settings = await Settings.findOne({ secret: SESSION_SECRET })
+
+    if (!settings) {
+      res.redirect(`${FRONT}`);
+      return;
+    }
+
+    const MerchantLogin = 'fakebot';
+    const OutSum = '200.00';
+    const InvId = `${user.user_id}`;
+    const Description = 'Fakebot 1 месяц';
+    const pass1 = settings.roboPass1;
+    const SignatureValue = md5(`${MerchantLogin}:${OutSum}:${InvId}:${pass1}`);
+    res.redirect(`https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=${MerchantLogin}&Description=${Description}&OutSum=${OutSum}&InvoiceID=${InvId}&SignatureValue=${SignatureValue}&IsTest=1`);
+  })
+
+  server.post('/api/payment/callback', (req: any, res: any) => {
+    console.log(req)
+
+    res.send('Ok');
+  })
 
   server.get('*', (req: any, res: any) => {
     return handle(req, res)

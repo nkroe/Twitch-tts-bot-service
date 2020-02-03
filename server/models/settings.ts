@@ -5,6 +5,8 @@ export type DBSettings = mongoose.Document & {
   refreshToken: string,
   secret: string,
   apiKey: string,
+  roboPass1: string,
+  roboPass2: string,
   paidUsers: string[]
 }
 
@@ -14,6 +16,8 @@ const Setting = new Schema(
     refreshToken: String,
     secret: String,
     apiKey: String,
+    roboPass1: String,
+    roboPass2: String,
     paidUsers: Array
   }
 )
