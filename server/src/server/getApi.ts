@@ -109,7 +109,7 @@ export const getApi = (server: Express, passport: any) => {
     res.redirect(`https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=${MerchantLogin}&Description=${Description}&OutSum=${OutSum}&InvoiceID=${InvId}&SignatureValue=${SignatureValue}&IsTest=1`);
   })
 
-  server.get('/api/payment/callback', async (req: any, res: any) => {
+  server.get('/api/payment/callback', async (_: any, res: any) => {
     res.send('Ok');
   })
 
