@@ -110,7 +110,7 @@ export const getApi = (server: Express, passport: any) => {
     const Description = description;
     const pass1 = settings.roboPass1;
     const SignatureValue = md5(`${MerchantLogin}:${OutSum}:${InvId}:${pass1}`);
-    res.redirect(`https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=${MerchantLogin}&Description=${Description}&OutSum=${OutSum}&InvoiceID=${InvId}&SignatureValue=${SignatureValue}&IsTest=1`);
+    res.redirect(`https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=${MerchantLogin}&Description=${Description}&OutSum=${OutSum}&InvoiceID=${InvId}&SignatureValue=${SignatureValue}`);
   }
 
   server.get('/api/payment/1', (req: any, res: any) => {
