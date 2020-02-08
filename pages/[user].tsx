@@ -1,21 +1,21 @@
 import io from 'socket.io-client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import getConfig from 'next/config';
-// import axios from 'axios';
+import axios from 'axios';
 
 const { publicRuntimeConfig } = getConfig()
 
 const User = () => {
-  // const [isPayed, setIsPayed] = useState('');
+  const [isPayed, setIsPayed] = useState('');
 
   useEffect(() => {
-    // axios.get(`${publicRuntimeConfig.BACK}/api/getUserIsPayed/${window.location.pathname.slice(1)}`).then((data: any) => {
-    //   if (!data || !data.data) return;
+    axios.get(`${publicRuntimeConfig.BACK}/api/getUserIsPayed/${window.location.pathname.slice(1)}`).then((data: any) => {
+      if (!data || !data.data) return;
 
-    //   if (data.data.isPayed === false) {
-    //     setIsPayed('Необходимо продлить подписку на fakebot.pro');
-    //   }
-    // })
+      if (data.data.isPayed === false) {
+        setIsPayed('Необходимо продлить подписку на fakebot.pro');
+      }
+    })
 
     let audioCtx = new AudioContext();
     let audioGain = audioCtx.createGain();
@@ -72,14 +72,14 @@ const User = () => {
     });
 
     socket.on(`isPayedNow-${window.location.pathname.slice(1)}`, () => {
-      // setIsPayed('');
+      setIsPayed('');
     });
 
   }, []);
 
   return (
     <>
-
+      {isPayed}
     </>
   )
 }

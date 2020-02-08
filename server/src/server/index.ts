@@ -37,16 +37,6 @@ app.prepare().then(() => {
   chatBot();
   tgBot();
 
-  Users.find().then(users => {
-    users.forEach((user, index) => {
-      Users.updateOne({ login: user.login }, {
-        $set: {
-          lastPaymentId: index + 1
-        }
-      }).then(() => '')
-    })
-  })
-
   event.on('play', play({ io }));
   event.on('skip', skipHandler({ io }))
   event.on('fakeon', fakeon({}))
