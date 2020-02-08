@@ -35,6 +35,8 @@ export const getInfoHandler: Type = event => async login => {
     muteUsers: mutedUsers,
     premUsers: user.premUsers,
     type: user.type,
-    fakeOn: user.fakeOn === undefined ? true : user.fakeOn
+    fakeOn: user.fakeOn === undefined ? true : user.fakeOn,
+    isPayed: user.isPayed,
+    isUserVip: user.isVip
   });
 };

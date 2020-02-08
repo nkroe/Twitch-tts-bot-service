@@ -10,10 +10,13 @@ export const getNewUser = (profile: any) => new Users({
   display_name: profile.data[0].display_name,
   image: profile.data[0].profile_image_url,
   user_link: createUUID(),
+  createdAt: createDate(),
   last_signin: createDate(),
   users: [],
   muteUsers: [],
   premUsers: [],
   type: 4,
-  stats: 0
+  stats: 0,
+  isVip: false,
+  isPayed: false,
 });

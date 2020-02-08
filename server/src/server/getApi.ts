@@ -4,6 +4,10 @@ import { Express } from "express";
 //@ts-ignore
 import md5 from 'md5';
 import { Settings } from "../../models/settings";
+import { createDate } from "../../lib/createDate";
+import { PaymentsPrices, PaymentsPricesValue, PaymentsDescription } from './paymentsEnumAndTypes';
+import { followChannel } from "./followChannel";
+import event from '../../lib/events';
 
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const FRONT = process.env.FRONT;
@@ -62,9 +66,9 @@ export const getApi = (server: Express, passport: any) => {
 
   server.get('/api/getAllUsers/:secret', function (req: { params: { secret: string | undefined; }; }, res: any) {
     if (req.params.secret === SESSION_SECRET) {
-      Users.find().then((data: { length: any; map: (arg0: (w: any) => any) => void; }) => {
+      Users.find({ $or: [ { isPayed: true }, { isVip: true } ] }).then((data: { length: any; map: (arg0: (w: any) => any) => void; }) => {
         if (data.length) {
-          res.send(data.map((w: { login: any; }) => w.login));
+          res.send({ users: data.map((w: { login: any; }) => w.login) });
         } else {
           res.send({
             status: 'error'
@@ -78,7 +82,7 @@ export const getApi = (server: Express, passport: any) => {
     }
   });
 
-  server.get('/api/payment/1', async (req: any, res: any) => {
+  const setPayment = async (req: any, res: any, amount: string, description: string) => {
     const { accessToken } = req.cookies;
 
     if (!accessToken) {
@@ -101,19 +105,27 @@ export const getApi = (server: Express, passport: any) => {
     }
 
     const MerchantLogin = 'fakebot';
-    const OutSum = '200';
+    const OutSum = amount;
     const InvId = `${user.user_id}`;
-    const Description = 'Fakebot 1 месяц';
+    const Description = description;
     const pass1 = settings.roboPass1;
     const SignatureValue = md5(`${MerchantLogin}:${OutSum}:${InvId}:${pass1}`);
     res.redirect(`https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=${MerchantLogin}&Description=${Description}&OutSum=${OutSum}&InvoiceID=${InvId}&SignatureValue=${SignatureValue}&IsTest=1`);
+  }
+
+  server.get('/api/payment/1', (req: any, res: any) => {
+    setPayment(req, res, PaymentsPrices.One, PaymentsDescription.One);
   })
 
-  server.get('/api/payment/callback', async (_: any, res: any) => {
-    res.send('Ok');
+  server.get('/api/payment/2', (req: any, res: any) => {
+    setPayment(req, res, PaymentsPrices.Three, PaymentsDescription.Three);
   })
 
-  server.post('/api/payment/success', async (req: any, res: any) => {
+  server.get('/api/payment/3', (req: any, res: any) => {
+    setPayment(req, res, PaymentsPrices.Six, PaymentsDescription.Six);
+  })
+
+  server.get('/api/payment/callback', async (req: any, res: any) => {
     const settings = await Settings.findOne({ secret: SESSION_SECRET })
 
     if (!settings) {
@@ -121,25 +133,54 @@ export const getApi = (server: Express, passport: any) => {
       return;
     }
 
-    const MerchantLogin = 'fakebot';
-    const OutSum = '200';
-    const pass1 = settings.roboPass1;
-    const { InvId, SignatureValue } = req.body;
+    const { OutSum, InvId, SignatureValue } = req.query;
+    const pass2 = settings.roboPass2;
+    const signOne = md5(`${OutSum}:${InvId}:${pass2}`).toUpperCase();
 
-    const sign = md5(`${MerchantLogin}:${OutSum}:${InvId}:${pass1}`)
-    const sign2 = md5(`${OutSum}:${InvId}:${pass1}`)
-    console.log(sign);
-    console.log(sign2);
-    console.log(SignatureValue);
-
-    if (sign !== SignatureValue) {
+    if (signOne !== SignatureValue) {
       res.send('Error');
       return;
     }
 
+    res.send(`OK${InvId}`)
+  })
+
+  server.get('/api/payment/success', async (req: any, res: any) => {
+    const settings = await Settings.findOne({ secret: SESSION_SECRET })
+
+    if (!settings) {
+      res.redirect(`${FRONT}`);
+      return;
+    }
+
+    const { OutSum, InvId, SignatureValue } = req.query;
+    const pass1 = settings.roboPass1;
+    const signOne = md5(`${OutSum}:${InvId}:${pass1}`);
+
+    if (signOne !== SignatureValue) {
+      res.send('Error');
+      return;
+    }
+
+    const user = await Users.findOne({ user_id: InvId });
+
+    if (!user) {
+      res.redirect(`${FRONT}`);
+      return;
+    }
+
+    const subscriptionEndDateMs: number = Date.now() + (PaymentsPricesValue[OutSum.toString()] * 60 * 60 * 24 * 30 * 1000);
+
     Users.findOneAndUpdate({ user_id: InvId }, {
-      isPayed: true
+      isPayed: true,
+      payedDate: createDate(),
+      payedDateMs: Date.now(),
+      subscriptionEndDateMs,
     }).then(() => {
+      if (!user.isFollowed) {
+        followChannel(0, user.user_id);
+      }
+      event.emit('addChannel', user.login);
       res.redirect(`${FRONT}`);
     })
   })

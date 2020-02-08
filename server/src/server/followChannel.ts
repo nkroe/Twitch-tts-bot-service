@@ -1,6 +1,7 @@
 require('dotenv').config();
 import axios from 'axios';
 import { Settings, DBSettings } from "../../models/settings";
+import { Users } from '../../models/users';
 
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const FOLLOW_SECRET = process.env.FOLLOW_SECRET;
@@ -16,7 +17,13 @@ export const followChannel = (c: number, id: any) => {
             'Client-ID': FOLLOW_ID,
             'Accept': 'application/vnd.twitchtv.v5+json'
           }
-        }).then(() => '').catch((e: { response: { data: any; }; }) => {
+        }).then(() => {
+          Users.updateOne({ user_id: id }, {
+            $set: {
+              isFollowed: true
+            }
+          }).then(() => '')
+        }).catch((e: { response: { data: any; }; }) => {
           console.log(e.response.data)
           axios.post(`https://id.twitch.tv/oauth2/token?grant_type=refresh_token&refresh_token=${settings.refreshToken}&client_id=${FOLLOW_ID}&client_secret=${FOLLOW_SECRET}`).then((_refresh: { data: { access_token: any; refresh_token: any; }; }) => {
             Settings.updateOne({

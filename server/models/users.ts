@@ -9,6 +9,7 @@ export type DBUser = mongoose.Document & {
   display_name: string,
   image: string,
   user_link: string,
+  createdAt: string,
   last_signin: string,
   users: { name: string, time: number }[],
   muteUsers: { name: string, time: number }[],
@@ -17,7 +18,12 @@ export type DBUser = mongoose.Document & {
   stats: number,
   volume: string,
   fakeOn: boolean,
-  isPayed: boolean
+  isFollowed: boolean,
+  isPayed: boolean,
+  payedDate: string,
+  payedDateMs: number,
+  subscriptionEndDateMs: number,
+  isVip: boolean
 }
 
 const User = new Schema(
@@ -30,6 +36,7 @@ const User = new Schema(
     display_name: String,
     image: String,
     user_link: String,
+    createdAt: String,
     last_signin: String,
     users: Array,
     muteUsers: Array,
@@ -38,7 +45,12 @@ const User = new Schema(
     stats: Number,
     volume: String,
     fakeOn: Boolean,
-    isPayed: Boolean
+    isFollowed: Boolean,
+    isPayed: Boolean,
+    payedDate: String,
+    payedDateMs: Number,
+    subscriptionEndDateMs: Number,
+    isVip: Boolean
   }
 )
 

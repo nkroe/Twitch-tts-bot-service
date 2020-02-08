@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-const ButtonBlock = styled.div`
+const ButtonBlock = styled.a`
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -17,13 +17,14 @@ const ButtonBlock = styled.div`
   font-size: 14px;
   cursor: pointer;
   font-family: 'Roboto', sans-serif;
+  text-decoration: none;
 
   &:hover {
       box-shadow: 1px 1px 0 1px #282235;
   }
 `
 
-export const Button = ({ text, onClick, style }: { text: string; onClick: any; style?: any }) =>
-  <ButtonBlock onClick={onClick} style={style}>
+export const ButtonLink = ({ text, onClick, link, style }: { text: string; onClick?: any; link?: string; style?: any }) =>
+  <ButtonBlock href={link} onClick={onClick} style={style} target="_blank">
     {text}
   </ButtonBlock>

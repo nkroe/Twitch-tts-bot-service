@@ -43,7 +43,9 @@ export const getClient = (client_channel: any) => {
 
     getChannelInfo(target.slice(1)).then(channelInfo => {
       //@ts-ignore
-      let { chan, users, premUsers, muteUsers, type, fakeOn } = channelInfo;
+      let { chan, users, premUsers, muteUsers, type, fakeOn, isPayed, isUserVip } = channelInfo;
+
+      if (!isPayed && !isUserVip) return
 
       const isPrem = () => ((context.badges && (context.badges.moderator || context.badges.broadcaster)) || (context.username === creator));
 

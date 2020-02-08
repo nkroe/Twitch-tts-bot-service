@@ -15,6 +15,7 @@ import { app } from './getApp';
 import { createServer } from './getServer';
 import { getPassport } from './passport';
 import { getApi } from './getApi';
+import { checkSubscriptionEnd } from './checkSubscriptionEnd';
 
 const PORT = process.env.PORT || 8080;
 
@@ -22,6 +23,7 @@ const passport = getPassport();
 
 startDb();
 startUpdateStats();
+checkSubscriptionEnd();
 
 app.prepare().then(() => {
   const server = createServer();

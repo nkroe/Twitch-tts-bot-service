@@ -3,11 +3,12 @@ import Base from '../layouts/Base';
 import getConfig from 'next/config';
 import axios from 'axios';
 import styled from 'styled-components';
-import Button from '../components/Button/Button';
+import { Button } from '../components/Button/Button';
 import ModalInstruct from '../components/Modals/ModalInstruct';
 import ModalSettings from '../components/Modals/ModalSettings';
 //@ts-ignore
-import { NotifyComponent } from 'react-notification-component';
+import { NotifyComponent, NotifyHandler } from 'react-notification-component';
+import copy from 'copy-to-clipboard';
 
 const { publicRuntimeConfig } = getConfig()
 
@@ -65,7 +66,7 @@ function getCookie(name: string) {
 
 const Index = () => {
   const [loading, setLoading] = useState(true);
-  const [userState, setUserState] = useState({ user_link: '', display_name: '' });
+  const [userState, setUserState] = useState({ user_link: '', display_name: '', isPayed: false, isVip: false });
   const [showModalInstruct, setModalInstruct] = useState(false);
   const [showModalSettings, setModalSettings] = useState(false);
 
@@ -91,15 +92,31 @@ const Index = () => {
       <ModalSettings show={showModalSettings} />
       {!loading ? (
         <>
-          <Button user={userState.user_link} text={userState.display_name ? ('Получить ссылку') : 'Войти с помощью Twitch'} type={userState.display_name ? 1 : 2} />
-          {userState.display_name ? (<ButtonBlock onClick={() => { setModalSettings(true) }} > Настройки </ButtonBlock>) : ''}
-          {userState.display_name ? (<ButtonBlock onClick={() => { setModalInstruct(true) }} > Инструкция </ButtonBlock>) : ''}
-          {userState.display_name ? (<Button text="Выйти" type={3} />) : ''}
+          {!userState.display_name && (<Button text={'Войти с помощью Twitch'} onClick={() => {
+            location.href = location.origin + '/api/auth/twitch';
+          }} />)}
+          {userState.display_name && (userState.isPayed || userState.isVip) && (<Button text={'Получить ссылку'} onClick={() => {
+            copy(`${location.origin}/${userState.user_link}`);
+            NotifyHandler.add("Скопировано", "", {}, {
+              mainBackground: '#4b367c',
+              mainBackgroundHover: '#4f3a81',
+              styleProgress: { background: '#634a9c' }
+            });
+            copy(`${location.origin}/${userState.user_link}`);
+          }} />)}
+          {userState.display_name && (userState.isPayed || userState.isVip) && (<ButtonBlock onClick={() => { setModalSettings(true) }} > Настройки </ButtonBlock>)}
+          {userState.display_name && (<ButtonBlock onClick={() => { setModalInstruct(true) }} > Инструкция </ButtonBlock>)}
+          {userState.display_name && !userState.isPayed && (<Button text={'Приобрести подписку'} onClick={() => {
+            location.href = `${publicRuntimeConfig.BACK}/payment`
+          }} />)}
+          {userState.display_name && (<Button text="Выйти" onClick={() => {
+            location.href = `${publicRuntimeConfig.BACK}/api/logout`;
+          }} />)}
         </>
       ) : (
           <Loading>Loading</Loading>
         )}
-        <NotifyComponent />
+      <NotifyComponent />
     </Base>
   )
 }
