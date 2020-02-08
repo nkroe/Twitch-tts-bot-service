@@ -12,14 +12,14 @@ import event from '../../lib/events';
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const FRONT = process.env.FRONT;
 
-export const getApi = (server: Express, passport: any) => {
+export const getApi = (server: Express, passport: any, io: any) => {
   server.get('/api/auth/twitch', passport.authenticate('twitch', { scope: 'user_read' }));
 
   server.get('/api/auth/twitch/callback',
     passport.authenticate('twitch', {
       failureRedirect: FRONT
     }),
-    function (req, res: any) {
+    (req, res: any) => {
       if (req.user === 'followersError') {
         res.redirect(`${FRONT}/followersError`);
       } else {
@@ -45,14 +45,14 @@ export const getApi = (server: Express, passport: any) => {
   );
 
   server.get('/api/logout', (req: { logout: () => void; }, res: any) => {
-      req.logout();
-      res.clearCookie('accessToken');
-      res.clearCookie('refreshToken');
-      res.redirect(FRONT);
-    }
+    req.logout();
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    res.redirect(FRONT);
+  }
   );
 
-  server.get('/api/getUser/:accessToken', function (req: { params: { accessToken: any; }; }, res: { send: { (arg0: any): void; (arg0: { status: string; }): void; }; }) {
+  server.get('/api/getUser/:accessToken', (req: { params: { accessToken: any; }; }, res: { send: { (arg0: any): void; (arg0: { status: string; }): void; }; }) => {
     Users.findOne({ accessToken: req.params.accessToken }).then((user: DBUser | null) => {
       if (user) {
         res.send(user);
@@ -64,9 +64,9 @@ export const getApi = (server: Express, passport: any) => {
     })
   });
 
-  server.get('/api/getAllUsers/:secret', function (req: { params: { secret: string | undefined; }; }, res: any) {
+  server.get('/api/getAllUsers/:secret', (req: { params: { secret: string | undefined; }; }, res: any) => {
     if (req.params.secret === SESSION_SECRET) {
-      Users.find({ $or: [ { isPayed: true }, { isVip: true } ] }).then((data: { length: any; map: (arg0: (w: any) => any) => void; }) => {
+      Users.find({ $or: [{ isPayed: true }, { isVip: true }] }).then((data: { length: any; map: (arg0: (w: any) => any) => void; }) => {
         if (data.length) {
           res.send({ users: data.map((w: { login: any; }) => w.login) });
         } else {
@@ -80,6 +80,24 @@ export const getApi = (server: Express, passport: any) => {
         status: 'Error'
       })
     }
+  });
+
+  server.get('/api/getUserIsPayed/:user_link', async (req: any, res: any) => {
+    const user_link = req.params.user_link
+
+    if (!user_link) {
+      res.send({ isPayed: false });
+      return;
+    }
+
+    const user = await Users.findOne({ user_link, isPayed: true });
+
+    if (!user) {
+      res.send({ isPayed: false });
+      return;
+    }
+
+    res.send({ isPayed: true });
   });
 
   const setPayment = async (req: any, res: any, amount: string, description: string) => {
@@ -106,7 +124,7 @@ export const getApi = (server: Express, passport: any) => {
 
     const MerchantLogin = 'fakebot';
     const OutSum = amount;
-    const InvId = `${user.user_id}`;
+    const InvId = `${user.lastPaymentId}`;
     const Description = description;
     const pass1 = settings.roboPass1;
     const SignatureValue = md5(`${MerchantLogin}:${OutSum}:${InvId}:${pass1}`);
@@ -162,7 +180,7 @@ export const getApi = (server: Express, passport: any) => {
       return;
     }
 
-    const user = await Users.findOne({ user_id: InvId });
+    const user = await Users.findOne({ lastPaymentId: InvId });
 
     if (!user) {
       res.redirect(`${FRONT}`);
@@ -171,17 +189,23 @@ export const getApi = (server: Express, passport: any) => {
 
     const subscriptionEndDateMs: number = Date.now() + (PaymentsPricesValue[OutSum.toString()] * 60 * 60 * 24 * 30 * 1000);
 
-    Users.findOneAndUpdate({ user_id: InvId }, {
+    Users.findOneAndUpdate({ lastPaymentId: InvId }, {
       isPayed: true,
       payedDate: createDate(),
       payedDateMs: Date.now(),
       subscriptionEndDateMs,
+      lastPaymentId: settings.paymentsCount
     }).then(() => {
-      if (!user.isFollowed) {
-        followChannel(0, user.user_id);
-      }
-      event.emit('addChannel', user.login);
-      res.redirect(`${FRONT}`);
+      Settings.findOneAndUpdate({ secret: SESSION_SECRET }, {
+        paymentsCount: settings.paymentsCount + 1
+      }).then(() => {
+        if (!user.isFollowed) {
+          followChannel(0, user.user_id);
+        }
+        event.emit('addChannel', user.login);
+        io.emit(`isPayedNow-${user.user_link}`, 'Ok');
+        res.redirect(`${FRONT}`);
+      });
     })
   })
 

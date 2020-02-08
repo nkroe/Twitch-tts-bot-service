@@ -23,7 +23,8 @@ export type DBUser = mongoose.Document & {
   payedDate: string,
   payedDateMs: number,
   subscriptionEndDateMs: number,
-  isVip: boolean
+  isVip: boolean,
+  lastPaymentId: number
 }
 
 const User = new Schema(
@@ -50,7 +51,8 @@ const User = new Schema(
     payedDate: String,
     payedDateMs: Number,
     subscriptionEndDateMs: Number,
-    isVip: Boolean
+    isVip: Boolean,
+    lastPaymentId: Number
   }
 )
 

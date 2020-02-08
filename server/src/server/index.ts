@@ -27,17 +27,25 @@ checkSubscriptionEnd();
 
 app.prepare().then(() => {
   const server = createServer();
-  
-  getApi(server, passport);
-
   const _server = server.listen(PORT, () => console.log('Server is started :)'))
+  const io = socketIO(_server);
+
+  getApi(server, passport, io);
 
   const { chatBot } = require('../twitch/chat-bot');
   const { tgBot } = require('../telegram/tgBot');
   chatBot();
   tgBot();
 
-  const io = socketIO(_server);
+  Users.find().then(users => {
+    users.forEach((user, index) => {
+      Users.updateOne({ login: user.login }, {
+        $set: {
+          lastPaymentId: index + 1
+        }
+      }).then(() => '')
+    })
+  })
 
   event.on('play', play({ io }));
   event.on('skip', skipHandler({ io }))

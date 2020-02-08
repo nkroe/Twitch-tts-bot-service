@@ -105,7 +105,7 @@ const Index = () => {
             copy(`${location.origin}/${userState.user_link}`);
           }} />)}
           {userState.display_name && (userState.isPayed || userState.isVip) && (<ButtonBlock onClick={() => { setModalSettings(true) }} > Настройки </ButtonBlock>)}
-          {userState.display_name && (<ButtonBlock onClick={() => { setModalInstruct(true) }} > Инструкция </ButtonBlock>)}
+          {userState.display_name && (userState.isPayed || userState.isVip) && (<ButtonBlock onClick={() => { setModalInstruct(true) }} > Инструкция </ButtonBlock>)}
           {userState.display_name && !userState.isPayed && (<Button text={'Приобрести подписку'} onClick={() => {
             location.href = `${publicRuntimeConfig.BACK}/payment`
           }} />)}

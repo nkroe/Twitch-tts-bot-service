@@ -41,9 +41,11 @@ export const getNewOAuth = () => new OAuth2Strategy({
     profile.accessToken = accessToken;
     profile.refreshToken = refreshToken;
 
-    Users.findOne({ "user_id": profile.data[0].id }).then((user: DBUser | null) => {
+    Users.findOne({ "user_id": profile.data[0].id }).then(async (user: DBUser | null) => {
       if (!user) {
-        const newUser = getNewUser(profile);
+        const newUser = await getNewUser(profile);
+
+        if (!newUser) return;
 
         newUser.save().then(() => {
           done(null, profile);
