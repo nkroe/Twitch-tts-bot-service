@@ -90,7 +90,7 @@ export const getApi = (server: Express, passport: any, io: any) => {
       return;
     }
 
-    const user = await Users.findOne({ user_link, isPayed: true });
+    const user = await Users.findOne({ user_link, $or: [{ isPayed: true }, { isVip: true }] });
 
     if (!user) {
       res.send({ isPayed: false });
