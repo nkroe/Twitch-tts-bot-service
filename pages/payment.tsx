@@ -37,8 +37,8 @@ const TermsOfUse = styled.div`
   position: absolute;
   bottom: 15px;
   left: 0;
-  color: #675d7d;
-  font-size: 10.5px;
+  color: #bcabe0;
+  font-size: 12px;
   text-align: center;
   justify-content: center;
   user-select: none;
@@ -79,7 +79,6 @@ const FollowersError = () => {
             location.href = `${publicRuntimeConfig.BACK}`;
           }} />
         </ButtonsDiv>
-        <Span>Рекомендуется после оплаты нажать на кнопку "Вернуться в магазин"</Span>
       </Div>
       <TermsOfUse onClick={() => setShowModalTermsOfUse(true)}>
         ПОЛЬЗОВАТЕЛЬСКОЕ СОГЛАШЕНИЕ

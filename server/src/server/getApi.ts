@@ -159,27 +159,7 @@ export const getApi = (server: Express, passport: any, io: any) => {
       res.send('Error');
       return;
     }
-
-    res.send(`OK${InvId}`)
-  })
-
-  server.get('/api/payment/success', async (req: any, res: any) => {
-    const settings = await Settings.findOne({ secret: SESSION_SECRET })
-
-    if (!settings) {
-      res.redirect(`${FRONT}`);
-      return;
-    }
-
-    const { OutSum, InvId, SignatureValue } = req.query;
-    const pass1 = settings.roboPass1;
-    const signOne = md5(`${OutSum}:${InvId}:${pass1}`);
-
-    if (signOne !== SignatureValue) {
-      res.send('Error');
-      return;
-    }
-
+    
     const user = await Users.findOne({ lastPaymentId: InvId });
 
     if (!user) {
@@ -204,7 +184,7 @@ export const getApi = (server: Express, passport: any, io: any) => {
         }
         event.emit('addChannel', user.login);
         io.emit(`isPayedNow-${user.user_link}`, 'Ok');
-        res.redirect(`${FRONT}`);
+        res.send(`OK${InvId}`)
       });
     })
   })
