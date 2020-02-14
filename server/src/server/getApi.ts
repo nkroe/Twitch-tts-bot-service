@@ -167,7 +167,7 @@ export const getApi = (server: Express, passport: any, io: any) => {
       return;
     }
 
-    const subscriptionEndDateMs: number = Date.now() + (PaymentsPricesValue[OutSum.toString()] * 60 * 60 * 24 * 30 * 1000);
+    const subscriptionEndDateMs: number = Date.now() + (PaymentsPricesValue[(Number(OutSum)).toString()] * 60 * 60 * 24 * 30 * 1000);
 
     Users.findOneAndUpdate({ lastPaymentId: InvId }, {
       isPayed: true,
