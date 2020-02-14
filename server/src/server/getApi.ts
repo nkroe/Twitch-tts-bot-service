@@ -189,6 +189,14 @@ export const getApi = (server: Express, passport: any, io: any) => {
     })
   })
 
+  server.get('/api/payment/success', async (_: any, res: any) => {
+    res.redirect(`${FRONT}`);
+  })
+
+  server.get('/api/payment/error', async (_: any, res: any) => {
+    res.redirect(`${FRONT}`);
+  })
+
   server.get('*', (req: any, res: any) => {
     return handle(req, res)
   })
