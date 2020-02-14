@@ -27,11 +27,6 @@ const ButtonsDiv = styled.div`
   user-select: none;
 `;
 
-const Span = styled.span`
-  align-self: center;
-  margin-top: 40px;
-`;
-
 const TermsOfUse = styled.div`
   width: 100%;
   position: absolute;
