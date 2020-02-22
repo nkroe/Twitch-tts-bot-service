@@ -20,26 +20,22 @@ export const getApi = (server: Express, passport: any, io: any) => {
       failureRedirect: FRONT
     }),
     (req, res: any) => {
-      if (req.user === 'followersError') {
-        res.redirect(`${FRONT}/followersError`);
-      } else {
-        //@ts-ignore
-        const { accessToken, refreshToken } = req.user;
-        try {
-          res.cookie('accessToken', accessToken, {
-            maxAge: 21600000,
-            httpOnly: false
-          });
-          res.cookie('refreshToken', refreshToken, {
-            maxAge: 21600000,
-            httpOnly: false
-          });
-          setTimeout(_ => {
-            res.redirect(FRONT);
-          }, 1000);
-        } catch (e) {
-          console.log(`Callback set cookie: ${e.message}`);
-        }
+      //@ts-ignore
+      const { accessToken, refreshToken } = req.user;
+      try {
+        res.cookie('accessToken', accessToken, {
+          maxAge: 21600000,
+          httpOnly: false
+        });
+        res.cookie('refreshToken', refreshToken, {
+          maxAge: 21600000,
+          httpOnly: false
+        });
+        setTimeout(_ => {
+          res.redirect(FRONT);
+        }, 1000);
+      } catch (e) {
+        console.log(`Callback set cookie: ${e.message}`);
       }
     }
   );
@@ -159,7 +155,7 @@ export const getApi = (server: Express, passport: any, io: any) => {
       res.send('Error');
       return;
     }
-    
+
     const user = await Users.findOne({ lastPaymentId: InvId });
 
     if (!user) {

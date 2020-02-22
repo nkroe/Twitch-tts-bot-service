@@ -2,6 +2,8 @@ import request from 'request';
 import { Users, DBUser } from "../../models/users";
 import { getNewUser } from "./getNewUser";
 import { createDate } from "../../lib/createDate";
+import event from '../../lib/events';
+
 const OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
 
 const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID;
@@ -62,6 +64,10 @@ export const getNewOAuth = () => new OAuth2Strategy({
             "last_signin": createDate(),
           }
         }).then(() => {
+          if (user.isPayed || user.isVip) {
+            event.emit('addChannel', user.login);
+          }
+
           done(null, profile);
           console.log('Update done');
           return;
