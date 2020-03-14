@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { Button } from '../components/Button/Button';
 import ModalInstruct from '../components/Modals/ModalInstruct';
 import ModalSettings from '../components/Modals/ModalSettings';
+import { TermsOfUse } from '../components/TermsOfUse';
 //@ts-ignore
 import { NotifyComponent, NotifyHandler } from 'react-notification-component';
 import copy from 'copy-to-clipboard';
@@ -66,9 +67,10 @@ function getCookie(name: string) {
 
 const Index = () => {
   const [loading, setLoading] = useState(true);
-  const [userState, setUserState] = useState({ user_link: '', display_name: '', isPayed: false, isVip: false });
+  const [userState, setUserState] = useState({ user_id: 0, user_link: '', display_name: '', isPayed: false, isVip: false });
   const [showModalInstruct, setModalInstruct] = useState(false);
   const [showModalSettings, setModalSettings] = useState(false);
+  const [showModalTermsOfUse, setShowModalTermsOfUse] = useState(false);
 
 
   useEffect(() => {
@@ -85,6 +87,24 @@ const Index = () => {
     })
   }, [])
 
+  const goToAuth = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    const r = urlParams.get('r');
+
+    location.href = `${location.origin}/api/auth/twitch${r ? `?r=${r}` : ''}`;
+  }
+
+  const copyLink = (link: string) => {
+    copy(link);
+    NotifyHandler.add("Скопировано", "", {}, {
+      mainBackground: '#4b367c',
+      mainBackgroundHover: '#4f3a81',
+      styleProgress: { background: '#634a9c' }
+    });
+    copy(link);
+  }
+
   return (
     <Base>
       <Modal__background style={{ zIndex: showModalInstruct || showModalSettings ? 100 : -1, display: showModalInstruct || showModalSettings ? 'block' : 'none' }} onClick={() => { setModalInstruct(false); setModalSettings(false); }} />
@@ -92,23 +112,14 @@ const Index = () => {
       <ModalSettings show={showModalSettings} />
       {!loading ? (
         <>
-          {!userState.display_name && (<Button text={'Войти с помощью Twitch'} onClick={() => {
-            location.href = location.origin + '/api/auth/twitch';
-          }} />)}
-          {userState.display_name && (userState.isPayed || userState.isVip) && (<Button text={'Получить ссылку'} onClick={() => {
-            copy(`${location.origin}/${userState.user_link}`);
-            NotifyHandler.add("Скопировано", "", {}, {
-              mainBackground: '#4b367c',
-              mainBackgroundHover: '#4f3a81',
-              styleProgress: { background: '#634a9c' }
-            });
-            copy(`${location.origin}/${userState.user_link}`);
-          }} />)}
+          {!userState.display_name && (<Button text={'Войти с помощью Twitch'} onClick={goToAuth} />)}
+          {userState.display_name && (userState.isPayed || userState.isVip) && (<Button text={'Получить ссылку'} onClick={() => copyLink(`${location.origin}/${userState.user_link}`)} />)}
           {userState.display_name && (userState.isPayed || userState.isVip) && (<ButtonBlock onClick={() => { setModalSettings(true) }} > Настройки </ButtonBlock>)}
           {userState.display_name && (userState.isPayed || userState.isVip) && (<ButtonBlock onClick={() => { setModalInstruct(true) }} > Инструкция </ButtonBlock>)}
-          {userState.display_name && !userState.isPayed && (<Button text={'Приобрести подписку'} onClick={() => {
+          {userState.display_name && (!userState.isPayed && !userState.isVip) && (<Button text={'Приобрести подписку'} onClick={() => {
             location.href = `${publicRuntimeConfig.BACK}/payment`
           }} />)}
+          {userState.display_name && (<Button text={'Реферальная ссылка'} onClick={() => copyLink(`${location.origin}/?r=${userState.user_id}`)} />)}
           {userState.display_name && (<Button text="Выйти" onClick={() => {
             location.href = `${publicRuntimeConfig.BACK}/api/logout`;
           }} />)}
@@ -117,6 +128,7 @@ const Index = () => {
           <Loading>Loading</Loading>
         )}
       <NotifyComponent />
+      <TermsOfUse show={showModalTermsOfUse} onClick={setShowModalTermsOfUse} />
     </Base>
   )
 }

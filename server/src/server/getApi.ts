@@ -8,6 +8,7 @@ import { createDate } from "../../lib/createDate";
 import { PaymentsPrices, PaymentsPricesValue, PaymentsDescription } from './paymentsEnumAndTypes';
 import { followChannel } from "./followChannel";
 import event from '../../lib/events';
+import { getQueryParam } from "../../lib/getQueryParam";
 
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const FRONT = process.env.FRONT;
@@ -23,6 +24,17 @@ export const getApi = (server: Express, passport: any, io: any) => {
       //@ts-ignore
       const { accessToken, refreshToken } = req.user;
       try {
+        const referralCode = getQueryParam(req.headers.referer);
+
+        if (referralCode) {
+          Users.updateOne(
+            { accessToken, referralCode: { $exists: false } },
+            { $set: {
+              referralCode
+            } }
+          ).then(() => '');
+        }
+
         res.cookie('accessToken', accessToken, {
           maxAge: 21600000,
           httpOnly: false
