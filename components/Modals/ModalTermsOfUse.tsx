@@ -46,7 +46,7 @@ const ModalTermsOfUse = ({ show }: any) => {
       <br/>
       <p><strong>Контактная информация</strong></p>
       <p>По всем вопросам и предложениям - nikitakfast1@mail.ru</p>
-      <p>Разработка индивидуальных ботов - <a href="https://vk.com/nikitakroe" style={{ textDecoration: 'none', color: '#fff' }} target="_blank">vk.com/nikitakroe</a></p>
+      <p>Разработка индивидуальных ботов - <a href="https://vk.com/nkroe" style={{ textDecoration: 'none', color: '#fff' }} target="_blank">vk.com/nkroe</a></p>
     </Modal__main>
    );
 }

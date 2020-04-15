@@ -31,7 +31,7 @@ const ModalInstruct = ({ show }: any) => {
       <p>1. Добавить в OBS новую сцену "Браузер"</p>
       <p>2. В поле "Адрес URL" вставить ссылку, которую получили при клике на кнопку "Получить ссылку" (она будет скопирована в буфер обмена)</p>
       <p>3. Поставить галочку "Обновлять браузер, когда сцена становится активной"</p>
-      <p>4. Если бот перестает работать нажать на кнопку в OBS "Обновить кэш текущей страницы" (команда !fakecache), либо сообщить разработчику в ВК - <a href="https://vk.com/nikitakroe" style={{ textDecoration: 'none', color: '#fff' }} target="_blank" >VK</a></p>
+      <p>4. Если бот перестает работать нажать на кнопку в OBS "Обновить кэш текущей страницы" (команда !fakecache), либо сообщить разработчику в ВК - <a href="https://vk.com/nkroe" style={{ textDecoration: 'none', color: '#fff' }} target="_blank" >VK</a></p>
       <br/>
       <p>Команды:</p>
       <p><strong>Все команды доступны модерам</strong></p>
@@ -55,7 +55,7 @@ const ModalInstruct = ({ show }: any) => {
       <p><strong>Ограничений в режиме выделенных сообщений нет</strong></p>
       <p>Ограничения для простого режима - сабы/випы/модеры - 250 символов и сообщение раз в 15 секунд</p>
       <br/>
-      <p>Если вы заметили баг/недоработку/есть предложения - можете сообщить разработчику в ВК - <a href="https://vk.com/nikitakroe" style={{ textDecoration: 'none', color: '#fff' }} target="_blank">VK</a></p>
+      <p>Если вы заметили баг/недоработку/есть предложения - можете сообщить разработчику в ВК - <a href="https://vk.com/nkroe" style={{ textDecoration: 'none', color: '#fff' }} target="_blank">VK</a></p>
       <p><a href="https://www.donationalerts.com/r/fake_fake_fake_" style={{ textDecoration: 'none', color: '#fff' }} target="_blank">Поддержать/отблагодарить - donationalerts</a></p>
     </Modal__main>
    );
