@@ -1,7 +1,7 @@
-import { Users } from "../../models/users";
-import { createUUID } from "../../lib/createUUID";
-import { createDate } from "../../lib/createDate";
-import { Settings } from "../../models/settings";
+import { Users } from '../../models/users';
+import { createUUID } from '../../lib/createUUID';
+import { createDate } from '../../lib/createDate';
+import { Settings } from '../../models/settings';
 
 const SESSION_SECRET = process.env.SESSION_SECRET;
 
@@ -27,12 +27,15 @@ export const getNewUser = async (profile: any) => {
     stats: 0,
     isVip: false,
     isPayed: false,
-    lastPaymentId: settings.paymentsCount
-  })
+    lastPaymentId: settings.paymentsCount,
+  });
 
-  await Settings.updateOne({ secret: SESSION_SECRET }, {
-    paymentsCount: settings.paymentsCount + 1
-  })
+  await Settings.updateOne(
+    { secret: SESSION_SECRET },
+    {
+      paymentsCount: settings.paymentsCount + 1,
+    }
+  );
 
   return user;
 };

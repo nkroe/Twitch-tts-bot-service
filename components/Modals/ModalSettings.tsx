@@ -1,19 +1,21 @@
-
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import io from 'socket.io-client';
 import getConfig from 'next/config';
 
-const { publicRuntimeConfig } = getConfig()
+const { publicRuntimeConfig } = getConfig();
 
-function getCookie(name: any) {
-  var matches = document.cookie.match(new RegExp(
-    "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
-  ));
+function getCookie(name: string) {
+  const matches = document.cookie.match(
+    new RegExp(
+      /*eslint-disable-next-line no-useless-escape*/
+      '(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'
+    )
+  );
   return matches ? decodeURIComponent(matches[1]) : undefined;
 }
 
-const Modal__main = styled.div`
+const ModalMain = styled.div`
   @import url('https://fonts.googleapis.com/css?family=Roboto:100,300,400,500&display=swap');
   width: 600px;
   height: 300px;
@@ -32,7 +34,7 @@ const Modal__main = styled.div`
   font-family: 'Roboto', sans-serif;
   color: #ccc;
   border-radius: 5px;
-`
+`;
 
 const ButtonBlock = styled.div`
   align-self: center;
@@ -54,7 +56,7 @@ const ButtonBlock = styled.div`
   &:hover {
     box-shadow: 1px 1px 0 1px #282235;
   }
-`
+`;
 
 const Input = styled.input`
   align-self: center;
@@ -67,7 +69,7 @@ const Input = styled.input`
   color: #fff;
   outline: none;
   user-select: none;
-`
+`;
 
 const Span = styled.span`
   align-self: center;
@@ -75,7 +77,7 @@ const Span = styled.span`
   font-size: 13.5px;
   text-align: center;
   user-select: none;
-`
+`;
 
 const SpanSpoiler = styled.span`
   align-self: center;
@@ -84,47 +86,56 @@ const SpanSpoiler = styled.span`
   text-align: center;
   user-select: none;
   opacity: 0.4;
-`
+`;
 
-const ModalSettings = ({ show }: any) => {
+const ModalSettings = ({ show }: { show: boolean }) => {
   const [inputValue, setInputValue] = useState('');
 
   const socket = io(publicRuntimeConfig.BACK);
 
-  const checkVolume = (a: string) => a.match(/^-?([0-9]){0,2}(\.([0-9]){1})?$/gi)
+  const checkVolume = (a: string) => a.match(/^-?([0-9]){0,2}(\.([0-9]){1})?$/gi);
 
   const sendData = () => {
-    const streamer = getCookie('accessToken')
+    const streamer = getCookie('accessToken');
     if (checkVolume(inputValue)) {
-      socket.emit('setVolume', ({ streamer, volume: Number(inputValue) }))
+      socket.emit('setVolume', { streamer, volume: inputValue });
       setInputValue('');
     } else {
-      alert('Bad volume')
+      alert('Bad volume');
     }
-  }
+  };
 
   const testVolume = () => {
-    const streamer = getCookie('accessToken')
-    socket.emit('testVolume', ({ streamer }))
-  }
+    const streamer = getCookie('accessToken');
+    socket.emit('testVolume', { streamer });
+  };
 
   return (
-    <Modal__main style={{ zIndex: show ? 100 : -1, display: show ? 'flex' : 'none' }}>
-      <Span>
-        Введите значение от -96.0 до 16.0 (оптимальные значения от -6 до 6)
-      </Span>
-      <Input onChange={e => setInputValue(e.target.value)} value={inputValue} type="text" placeholder="Значение громкости" />
-      <ButtonBlock onClick={() => { sendData() }}>
+    <ModalMain style={{ zIndex: show ? 100 : -1, display: show ? 'flex' : 'none' }}>
+      <Span>Введите значение от -96.0 до 16.0 (оптимальные значения от -6 до 6)</Span>
+      <Input
+        onChange={e => setInputValue(e.target.value)}
+        value={inputValue}
+        type="text"
+        placeholder="Значение громкости"
+      />
+      <ButtonBlock
+        onClick={() => {
+          sendData();
+        }}
+      >
         Сохранить
       </ButtonBlock>
-      <ButtonBlock onClick={() => { testVolume() }}>
+      <ButtonBlock
+        onClick={() => {
+          testVolume();
+        }}
+      >
         Тест
       </ButtonBlock>
-      <SpanSpoiler>
-        Для теста необходимо открыть свою ссылку, либо добавить её в ОБС
-      </SpanSpoiler>
-    </Modal__main>
+      <SpanSpoiler>Для теста необходимо открыть свою ссылку, либо добавить её в ОБС</SpanSpoiler>
+    </ModalMain>
   );
-}
+};
 
 export default ModalSettings;

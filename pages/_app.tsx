@@ -1,21 +1,21 @@
-import App from 'next/app'
-import Head from 'next/head'
-import React from 'react'
+import App from 'next/app';
+import Head from 'next/head';
+import React from 'react';
 
 export default class MyApp extends App {
   //@ts-ignore
   static async getInitialProps({ Component, ctx }) {
-    let pageProps = {}
+    let pageProps = {};
 
     if (Component.getInitialProps) {
-      pageProps = await Component.getInitialProps(ctx)
+      pageProps = await Component.getInitialProps(ctx);
     }
 
-    return { pageProps }
+    return { pageProps };
   }
 
   render() {
-    const { Component, pageProps } = this.props
+    const { Component, pageProps } = this.props;
 
     return (
       <>
@@ -24,6 +24,6 @@ export default class MyApp extends App {
         </Head>
         <Component {...pageProps} />
       </>
-    )
+    );
   }
 }

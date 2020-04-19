@@ -8,6 +8,6 @@ export const skipHandler: Type = ({ io }) => async ({ streamer }) => {
   Users.findOne({ login: streamer }).then(user => {
     if (!user) return;
 
-    io.emit(`skip-${user.user_link}`, '')
-  })
+    io.emit(`skip-${user.user_link}`, '');
+  });
 };

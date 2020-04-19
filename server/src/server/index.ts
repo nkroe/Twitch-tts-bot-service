@@ -1,13 +1,19 @@
-require('dotenv').config();
-
 import socketIO from 'socket.io';
 import event from '../../lib/events';
 import { Users } from '../../models/users';
 import {
-  play, reloadCacheHandler, getInfoHandler, skipHandler,
-  muteHandler, unmuteHandler, updateUsersHandler,
-  updateTypeHandler, setpremHandler, unpremHandler,
-  fakeon, fakeoff
+  play,
+  reloadCacheHandler,
+  getInfoHandler,
+  skipHandler,
+  muteHandler,
+  unmuteHandler,
+  updateUsersHandler,
+  updateTypeHandler,
+  setpremHandler,
+  unpremHandler,
+  fakeon,
+  fakeoff,
 } from '../eventHandlers';
 import { startDb } from './startDb';
 import { startUpdateStats } from './updateStats';
@@ -16,6 +22,10 @@ import { createServer } from './getServer';
 import { getPassport } from './passport';
 import { getApi } from './getApi';
 import { checkSubscriptionEnd } from './checkSubscriptionEnd';
+import { chatBot } from '../twitch/chat-bot';
+// import { tgBot } from '../telegram/tgBot';
+
+require('dotenv').config();
 
 const PORT = process.env.PORT || 8080;
 
@@ -25,52 +35,51 @@ startDb();
 startUpdateStats();
 checkSubscriptionEnd();
 
-app.prepare().then(() => {
-  const server = createServer();
-  const _server = server.listen(PORT, () => console.log('Server is started :)'))
-  const io = socketIO(_server);
+app
+  .prepare()
+  .then(() => {
+    const server = createServer();
+    const _server = server.listen(PORT, () => console.log('Server is started :)'));
+    const io = socketIO(_server);
 
-  getApi(server, passport, io);
+    getApi(server, passport, io);
+    chatBot();
+    // tgBot();
 
-  const { chatBot } = require('../twitch/chat-bot');
-  const { tgBot } = require('../telegram/tgBot');
-  chatBot();
-  tgBot();
+    event.on('play', play({ io }));
+    event.on('skip', skipHandler({ io }));
+    event.on('fakeon', fakeon({}));
+    event.on('fakeoff', fakeoff({}));
+    event.on('reloadCache', reloadCacheHandler({ io }));
+    event.on('mute', muteHandler({}));
+    event.on('unmute', unmuteHandler({}));
+    event.on('getInfo', getInfoHandler(event));
+    event.on('updateUsers', updateUsersHandler({}));
+    event.on('updateType', updateTypeHandler({}));
+    event.on('setprem', setpremHandler({}));
+    event.on('unprem', unpremHandler({}));
 
-  event.on('play', play({ io }));
-  event.on('skip', skipHandler({ io }))
-  event.on('fakeon', fakeon({}))
-  event.on('fakeoff', fakeoff({}))
-  event.on('reloadCache', reloadCacheHandler({ io }));
-  event.on('mute', muteHandler({}));
-  event.on('unmute', unmuteHandler({}))
-  event.on('getInfo', getInfoHandler(event));
-  event.on('updateUsers', updateUsersHandler({}))
-  event.on('updateType', updateTypeHandler({}))
-  event.on('setprem', setpremHandler({}))
-  event.on('unprem', unpremHandler({}))
+    io.on('connection', (socket: socketIO.Socket) => {
+      console.log('Client connected');
 
-  io.on('connection', (socket: socketIO.Socket) => {
-    console.log('Client connected');
+      socket.on('setVolume', ({ streamer, volume }: { streamer: string; volume: string }) => {
+        Users.findOneAndUpdate({ accessToken: streamer }, { volume }).then(() => '');
+      });
 
-    socket.on('setVolume', ({ streamer, volume }: { streamer: string, volume: number }) => {
-      Users.findOneAndUpdate({ accessToken: streamer }, { volume }).then(() => '')
-    })
+      socket.on('testVolume', ({ streamer }: { streamer: string }) => {
+        Users.find({ accessToken: streamer }).then((data: any) => {
+          if (data.length) {
+            event.emit('play', { streamer: data[0].login, text: 'Тест' });
+          }
+        });
+      });
 
-    socket.on('testVolume', ({ streamer }: { streamer: string }) => {
-      Users.find({ accessToken: streamer }).then((data: any) => {
-        if (data.length) {
-          event.emit('play', { streamer: data[0].login, text: 'Тест' })
-        }
-      })
-    })
-
-    socket.on('disconnect', () => {
-      console.log('Client disconnect')
-    })
+      socket.on('disconnect', () => {
+        console.log('Client disconnect');
+      });
+    });
   })
-
-}).catch((ex: { stack: string }) => {
-  process.exit(1)
-  console.error(ex.stack)
-});
+  .catch((ex: { stack: string }) => {
+    process.exit(1);
+    console.error(ex.stack);
+  });

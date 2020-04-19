@@ -9,12 +9,15 @@ export const setpremHandler: Type = () => async ({ channel, name }) => {
 
     const premUsers = user.premUsers.concat({ name });
 
-    Users.updateOne({
-      login: channel
-    }, {
-      $set: {
-        "premUsers": premUsers
+    Users.updateOne(
+      {
+        login: channel,
+      },
+      {
+        $set: {
+          premUsers: premUsers,
+        },
       }
-    }).then(() => '')
-  })
+    ).then(() => '');
+  });
 };

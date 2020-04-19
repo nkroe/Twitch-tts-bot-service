@@ -5,7 +5,7 @@ import { Button } from '../components/Button/Button';
 import getConfig from 'next/config';
 import { TermsOfUse } from '../components/TermsOfUse';
 
-const { publicRuntimeConfig } = getConfig()
+const { publicRuntimeConfig } = getConfig();
 
 const Div = styled.div`
   display: flex;
@@ -34,23 +34,38 @@ const FollowersError = () => {
     <Base>
       <Div>
         <ButtonsDiv>
-          <Button text={'Подписка на 1 месяц'} onClick={() => {
-            location.href = `${publicRuntimeConfig.BACK}/api/payment/1`;
-          }} style={{ alignSelf: 'center' }}/>
-          <Button text={'Подписка на 3 месяца'} onClick={() => {
-            location.href = `${publicRuntimeConfig.BACK}/api/payment/2`;
-          }} style={{ alignSelf: 'center' }}/>
-          <Button text={'Подписка на 6 месяцев'} onClick={() => {
-            location.href = `${publicRuntimeConfig.BACK}/api/payment/3`;
-          }} style={{ alignSelf: 'center' }}/>
-          <Button text="Назад" onClick={() => {
-            location.href = `${publicRuntimeConfig.BACK}`;
-          }} />
+          <Button
+            text={'Подписка на 1 месяц'}
+            onClick={() => {
+              window.location.href = `${publicRuntimeConfig.BACK}/api/payment/1`;
+            }}
+            style={{ alignSelf: 'center' }}
+          />
+          <Button
+            text={'Подписка на 3 месяца'}
+            onClick={() => {
+              window.location.href = `${publicRuntimeConfig.BACK}/api/payment/2`;
+            }}
+            style={{ alignSelf: 'center' }}
+          />
+          <Button
+            text={'Подписка на 6 месяцев'}
+            onClick={() => {
+              window.location.href = `${publicRuntimeConfig.BACK}/api/payment/3`;
+            }}
+            style={{ alignSelf: 'center' }}
+          />
+          <Button
+            text="Назад"
+            onClick={() => {
+              window.location.href = `${publicRuntimeConfig.BACK}`;
+            }}
+          />
         </ButtonsDiv>
       </Div>
       <TermsOfUse show={showModalTermsOfUse} onClick={setShowModalTermsOfUse} />
     </Base>
-  )
-}
+  );
+};
 
 export default FollowersError;

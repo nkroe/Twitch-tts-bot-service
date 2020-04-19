@@ -1,14 +1,14 @@
-import { Users, DBUser } from "../../models/users";
-import { handle } from "./getApp";
-import { Express } from "express";
+import { Users, DBUser } from '../../models/users';
+import { handle } from './getApp';
+import { Express } from 'express';
 //@ts-ignore
 import md5 from 'md5';
-import { Settings } from "../../models/settings";
-import { createDate } from "../../lib/createDate";
+import { Settings } from '../../models/settings';
+import { createDate } from '../../lib/createDate';
 import { PaymentsPrices, PaymentsPricesValue, PaymentsDescription } from './paymentsEnumAndTypes';
-import { followChannel } from "./followChannel";
+import { followChannel } from './followChannel';
 import event from '../../lib/events';
-import { getQueryParam } from "../../lib/getQueryParam";
+import { getQueryParam } from '../../lib/getQueryParam';
 
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const FRONT = process.env.FRONT;
@@ -16,9 +16,10 @@ const FRONT = process.env.FRONT;
 export const getApi = (server: Express, passport: any, io: any) => {
   server.get('/api/auth/twitch', passport.authenticate('twitch', { scope: 'user_read' }));
 
-  server.get('/api/auth/twitch/callback',
+  server.get(
+    '/api/auth/twitch/callback',
     passport.authenticate('twitch', {
-      failureRedirect: FRONT
+      failureRedirect: FRONT,
     }),
     (req, res: any) => {
       //@ts-ignore
@@ -29,19 +30,21 @@ export const getApi = (server: Express, passport: any, io: any) => {
         if (referralCode) {
           Users.updateOne(
             { accessToken, referralCode: { $exists: false } },
-            { $set: {
-              referralCode
-            } }
+            {
+              $set: {
+                referralCode,
+              },
+            }
           ).then(() => '');
         }
 
         res.cookie('accessToken', accessToken, {
           maxAge: 21600000,
-          httpOnly: false
+          httpOnly: false,
         });
         res.cookie('refreshToken', refreshToken, {
           maxAge: 21600000,
-          httpOnly: false
+          httpOnly: false,
         });
         setTimeout(_ => {
           res.redirect(FRONT);
@@ -52,46 +55,50 @@ export const getApi = (server: Express, passport: any, io: any) => {
     }
   );
 
-  server.get('/api/logout', (req: { logout: () => void; }, res: any) => {
+  server.get('/api/logout', (req: { logout: () => void }, res: any) => {
     req.logout();
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
     res.redirect(FRONT);
-  }
-  );
-
-  server.get('/api/getUser/:accessToken', (req: { params: { accessToken: any; }; }, res: { send: { (arg0: any): void; (arg0: { status: string; }): void; }; }) => {
-    Users.findOne({ accessToken: req.params.accessToken }).then((user: DBUser | null) => {
-      if (user) {
-        res.send(user);
-      } else {
-        res.send({
-          status: 'error'
-        })
-      }
-    })
   });
 
-  server.get('/api/getAllUsers/:secret', (req: { params: { secret: string | undefined; }; }, res: any) => {
-    if (req.params.secret === SESSION_SECRET) {
-      Users.find({ $or: [{ isPayed: true }, { isVip: true }] }).then((data: { length: any; map: (arg0: (w: any) => any) => void; }) => {
-        if (data.length) {
-          res.send({ users: data.map((w: { login: any; }) => w.login) });
+  server.get(
+    '/api/getUser/:accessToken',
+    (req: { params: { accessToken: any } }, res: { send: { (arg0: any): void; (arg0: { status: string }): void } }) => {
+      Users.findOne({ accessToken: req.params.accessToken }).then((user: DBUser | null) => {
+        if (user) {
+          res.send(user);
         } else {
           res.send({
-            status: 'error'
-          })
+            status: 'error',
+          });
         }
-      })
+      });
+    }
+  );
+
+  server.get('/api/getAllUsers/:secret', (req: { params: { secret: string | undefined } }, res: any) => {
+    if (req.params.secret === SESSION_SECRET) {
+      Users.find({ $or: [{ isPayed: true }, { isVip: true }] }).then(
+        (data: { length: any; map: (arg0: (w: any) => any) => void }) => {
+          if (data.length) {
+            res.send({ users: data.map((w: { login: any }) => w.login) });
+          } else {
+            res.send({
+              status: 'error',
+            });
+          }
+        }
+      );
     } else {
       res.send({
-        status: 'Error'
-      })
+        status: 'Error',
+      });
     }
   });
 
   server.get('/api/getUserIsPayed/:user_link', async (req: any, res: any) => {
-    const user_link = req.params.user_link
+    const user_link = req.params.user_link;
 
     if (!user_link) {
       res.send({ isPayed: false });
@@ -123,7 +130,7 @@ export const getApi = (server: Express, passport: any, io: any) => {
       return;
     }
 
-    const settings = await Settings.findOne({ secret: SESSION_SECRET })
+    const settings = await Settings.findOne({ secret: SESSION_SECRET });
 
     if (!settings) {
       res.redirect(`${FRONT}`);
@@ -136,23 +143,25 @@ export const getApi = (server: Express, passport: any, io: any) => {
     const Description = description;
     const pass1 = settings.roboPass1;
     const SignatureValue = md5(`${MerchantLogin}:${OutSum}:${InvId}:${pass1}`);
-    res.redirect(`https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=${MerchantLogin}&Description=${Description}&OutSum=${OutSum}&InvoiceID=${InvId}&SignatureValue=${SignatureValue}`);
-  }
+    res.redirect(
+      `https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=${MerchantLogin}&Description=${Description}&OutSum=${OutSum}&InvoiceID=${InvId}&SignatureValue=${SignatureValue}`
+    );
+  };
 
   server.get('/api/payment/1', (req: any, res: any) => {
     setPayment(req, res, PaymentsPrices.One, PaymentsDescription.One);
-  })
+  });
 
   server.get('/api/payment/2', (req: any, res: any) => {
     setPayment(req, res, PaymentsPrices.Three, PaymentsDescription.Three);
-  })
+  });
 
   server.get('/api/payment/3', (req: any, res: any) => {
     setPayment(req, res, PaymentsPrices.Six, PaymentsDescription.Six);
-  })
+  });
 
   server.get('/api/payment/callback', async (req: any, res: any) => {
-    const settings = await Settings.findOne({ secret: SESSION_SECRET })
+    const settings = await Settings.findOne({ secret: SESSION_SECRET });
 
     if (!settings) {
       res.redirect(`${FRONT}`);
@@ -175,37 +184,44 @@ export const getApi = (server: Express, passport: any, io: any) => {
       return;
     }
 
-    const subscriptionEndDateMs: number = Date.now() + (PaymentsPricesValue[(Number(OutSum)).toString()] * 60 * 60 * 24 * 30 * 1000);
+    const subscriptionEndDateMs: number =
+      Date.now() + PaymentsPricesValue[Number(OutSum).toString()] * 60 * 60 * 24 * 30 * 1000;
 
-    Users.findOneAndUpdate({ lastPaymentId: InvId }, {
-      isPayed: true,
-      payedDate: createDate(),
-      payedDateMs: Date.now(),
-      subscriptionEndDateMs,
-      lastPaymentId: settings.paymentsCount
-    }).then(() => {
-      Settings.findOneAndUpdate({ secret: SESSION_SECRET }, {
-        paymentsCount: settings.paymentsCount + 1
-      }).then(() => {
+    Users.findOneAndUpdate(
+      { lastPaymentId: InvId },
+      {
+        isPayed: true,
+        payedDate: createDate(),
+        payedDateMs: Date.now(),
+        subscriptionEndDateMs,
+        lastPaymentId: settings.paymentsCount,
+      }
+    ).then(() => {
+      Settings.findOneAndUpdate(
+        { secret: SESSION_SECRET },
+        {
+          paymentsCount: settings.paymentsCount + 1,
+        }
+      ).then(() => {
         if (!user.isFollowed) {
           followChannel(0, user.user_id);
         }
         event.emit('addChannel', user.login);
         io.emit(`isPayedNow-${user.user_link}`, 'Ok');
-        res.send(`OK${InvId}`)
+        res.send(`OK${InvId}`);
       });
-    })
-  })
+    });
+  });
 
   server.get('/api/payment/success', async (_: any, res: any) => {
     res.redirect(`${FRONT}`);
-  })
+  });
 
   server.get('/api/payment/error', async (_: any, res: any) => {
     res.redirect(`${FRONT}`);
-  })
+  });
 
   server.get('*', (req: any, res: any) => {
-    return handle(req, res)
-  })
-}
+    return handle(req, res);
+  });
+};

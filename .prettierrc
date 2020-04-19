@@ -1,0 +1,12 @@
+{
+  "trailingComma": "es5",
+  "singleQuote": true,
+  "printWidth": 120,
+  "overrides": [
+    {
+      "options": {
+        "singleQuote": false
+      }
+    }
+  ]
+}

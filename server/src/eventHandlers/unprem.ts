@@ -1,7 +1,7 @@
 import { Users } from '../../models/users';
 import { EventHandler } from './types';
 
-type Type = EventHandler<{}, { channel: string; name: string; }>;
+type Type = EventHandler<{}, { channel: string; name: string }>;
 
 export const unpremHandler: Type = () => async ({ channel, name }) => {
   Users.findOne({ login: channel }).then(user => {
@@ -9,12 +9,15 @@ export const unpremHandler: Type = () => async ({ channel, name }) => {
 
     const premUsers = user.premUsers.filter(w => w.name !== name);
 
-    Users.updateOne({
-      login: channel
-    }, {
-      $set: {
-        "premUsers": premUsers
+    Users.updateOne(
+      {
+        login: channel,
+      },
+      {
+        $set: {
+          premUsers: premUsers,
+        },
       }
-    }).then(() => '')
-  })
+    ).then(() => '');
+  });
 };
