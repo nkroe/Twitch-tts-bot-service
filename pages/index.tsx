@@ -4,12 +4,13 @@ import getConfig from 'next/config';
 import axios from 'axios';
 import styled from 'styled-components';
 import { Button } from '../components/Button/Button';
-import ModalInstruct from '../components/Modals/ModalInstruct';
-import ModalSettings from '../components/Modals/ModalSettings';
+import { ModalInstruct } from '../components/Modals/modalInstruct';
+import { ModalSettings } from '../components/Modals/modalSettings';
 import { TermsOfUse } from '../components/TermsOfUse';
 //@ts-ignore
 import { NotifyComponent, NotifyHandler } from 'react-notification-component';
 import copy from 'copy-to-clipboard';
+import { getCookie } from '../server/lib/getCookie';
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -21,6 +22,7 @@ const Loading = styled.div`
   font-family: 'Roboto', sans-serif;
   letter-spacing: 1.1px;
   user-select: none;
+  align-self: center;
 `;
 
 const ButtonBlock = styled.div`
@@ -47,27 +49,12 @@ const ButtonBlock = styled.div`
   }
 `;
 
-const ModalBackground = styled.div`
-  width: 100%;
-  height: 100vh;
-  position: absolute;
-  left: 0;
-  top: 0;
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: -1;
-  cursor: pointer;
+const Buttons = styled.div`
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: center;
 `;
-
-function getCookie(name: string) {
-  const matches = document.cookie.match(
-    new RegExp(
-      /*eslint-disable-next-line no-useless-escape*/
-      '(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'
-    )
-  );
-  return matches ? decodeURIComponent(matches[1]) : undefined;
-}
 
 const Index = () => {
   const [loading, setLoading] = useState(true);
@@ -121,23 +108,34 @@ const Index = () => {
 
   return (
     <Base>
-      <ModalBackground
+      <ModalInstruct
         style={{
-          zIndex: showModalInstruct || showModalSettings ? 100 : -1,
-          display: showModalInstruct || showModalSettings ? 'block' : 'none',
+          zIndex: showModalInstruct ? 100 : -1,
+          display: showModalInstruct ? 'block' : 'none',
         }}
         onClick={() => {
           setModalInstruct(false);
           setModalSettings(false);
         }}
       />
-      <ModalInstruct show={showModalInstruct} />
-      <ModalSettings show={showModalSettings} />
+      <ModalSettings
+        style={{
+          zIndex: showModalSettings ? 100 : -1,
+          display: showModalSettings ? 'flex' : 'none',
+        }}
+        onClick={() => {
+          setModalInstruct(false);
+          setModalSettings(false);
+        }}
+      />
       {!loading ? (
-        <>
+        <Buttons>
           {!userState.display_name && <Button text={'Войти с помощью Twitch'} onClick={goToAuth} />}
           {userState.display_name && (userState.isPayed || userState.isVip) && (
-            <Button text={'Получить ссылку'} onClick={() => copyLink(`${window.location.origin}/${userState.user_link}`)} />
+            <Button
+              text={'Получить ссылку'}
+              onClick={() => copyLink(`${window.location.origin}/${userState.user_link}`)}
+            />
           )}
           {userState.display_name && (userState.isPayed || userState.isVip) && (
             <ButtonBlock
@@ -181,7 +179,7 @@ const Index = () => {
               }}
             />
           )}
-        </>
+        </Buttons>
       ) : (
         <Loading>Loading</Loading>
       )}

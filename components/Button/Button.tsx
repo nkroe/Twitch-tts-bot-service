@@ -1,5 +1,11 @@
 import styled from 'styled-components';
 
+type Props = {
+  text: string;
+  onClick: () => void;
+  style?: { alignSelf: string };
+};
+
 const ButtonBlock = styled.div`
   display: flex;
   justify-content: center;
@@ -24,7 +30,7 @@ const ButtonBlock = styled.div`
   }
 `;
 
-export const Button = ({ text, onClick, style }: { text: string; onClick: any; style?: any }) => (
+export const Button = ({ text, onClick, style }: Props) => (
   <ButtonBlock onClick={onClick} style={style}>
     {text}
   </ButtonBlock>

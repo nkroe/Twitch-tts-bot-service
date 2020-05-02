@@ -36,7 +36,7 @@ const User = () => {
       playSound(queue.msg[0]).then(() => playQueue());
     };
 
-    const playSound = (buff: any) =>
+    const playSound = (buff: AudioBuffer) =>
       new Promise(res => {
         const source = audioCtx.createBufferSource();
         source.buffer = buff;

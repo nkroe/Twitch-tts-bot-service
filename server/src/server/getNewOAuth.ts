@@ -25,7 +25,7 @@ OAuth2Strategy.prototype.userProfile = function(
   };
 
   request(options, function(_, response: { statusCode: number }, body: string) {
-    if (response && response.statusCode == 200) {
+    if (response && response.statusCode === 200) {
       done(null, JSON.parse(body));
     } else {
       done(JSON.parse(body));

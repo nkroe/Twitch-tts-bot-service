@@ -20,9 +20,16 @@ const ModalMain = styled.div`
   font-family: 'Roboto', sans-serif;
   color: #ccc;
   border-radius: 5px;
+
+  @media only screen and (max-width: 767px) {
+    width: auto;
+    left: 0;
+    top: 0;
+    margin: 20px;
+  }
 `;
 
-const ModalTermsOfUse = ({ show }: { show: boolean }) => {
+export const ModalTermsOfUse = ({ show }: { show: boolean }) => {
   return (
     <ModalMain style={{ zIndex: show ? 100 : -1, display: show ? 'flex' : 'none' }}>
       <p>
@@ -76,5 +83,3 @@ const ModalTermsOfUse = ({ show }: { show: boolean }) => {
     </ModalMain>
   );
 };
-
-export default ModalTermsOfUse;

@@ -1,5 +1,5 @@
-import React, { Fragment } from 'react';
-import ModalTermsOfUse from '../Modals/ModalTermsOfUse';
+import React, { Fragment, Dispatch, SetStateAction } from 'react';
+import { ModalTermsOfUse } from './modalTermsOfUse';
 import styled from 'styled-components';
 
 const TermsOfUseBlock = styled.div`
@@ -22,23 +22,35 @@ const ModalBackground = styled.div`
   position: absolute;
   left: 0;
   top: 0;
-  overflow: hidden;
+  overflow: auto;
   background: rgba(0, 0, 0, 0.5);
   z-index: -1;
   cursor: pointer;
 `;
 
-export const TermsOfUse = ({ show, onClick }: { show: boolean; onClick: any }) => {
+type Props = {
+  show: boolean;
+  onClick: Dispatch<SetStateAction<boolean>>;
+};
+
+export const TermsOfUse = ({ show, onClick }: Props) => {
+  const onBackgroundClicked = (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    if (e.target !== e.currentTarget) return;
+
+    onClick(false);
+  };
+
   return (
     <Fragment>
       <ModalBackground
         style={{ zIndex: show ? 100 : -1, display: show ? 'block' : 'none' }}
-        onClick={() => {
-          onClick(false);
-        }}
-      />
+        onClick={onBackgroundClicked}
+      >
+        <ModalTermsOfUse show={show} />
+      </ModalBackground>
       <TermsOfUseBlock onClick={() => onClick(true)}>ПОЛЬЗОВАТЕЛЬСКОЕ СОГЛАШЕНИЕ</TermsOfUseBlock>
-      <ModalTermsOfUse show={show} />
     </Fragment>
   );
 };

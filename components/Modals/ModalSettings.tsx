@@ -2,18 +2,10 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import io from 'socket.io-client';
 import getConfig from 'next/config';
+import { getCookie } from '../../server/lib/getCookie';
+import { ModalBackground } from './modalBackground';
 
 const { publicRuntimeConfig } = getConfig();
-
-function getCookie(name: string) {
-  const matches = document.cookie.match(
-    new RegExp(
-      /*eslint-disable-next-line no-useless-escape*/
-      '(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'
-    )
-  );
-  return matches ? decodeURIComponent(matches[1]) : undefined;
-}
 
 const ModalMain = styled.div`
   @import url('https://fonts.googleapis.com/css?family=Roboto:100,300,400,500&display=swap');
@@ -32,8 +24,15 @@ const ModalMain = styled.div`
   font-weight: 400;
   line-height: 1.7;
   font-family: 'Roboto', sans-serif;
-  color: #ccc;
+  color: #fff;
   border-radius: 5px;
+
+  @media only screen and (max-width: 767px) {
+    width: auto;
+    left: 0;
+    top: 0;
+    margin: 20px;
+  }
 `;
 
 const ButtonBlock = styled.div`
@@ -85,10 +84,14 @@ const SpanSpoiler = styled.span`
   font-size: 12.5px;
   text-align: center;
   user-select: none;
-  opacity: 0.4;
 `;
 
-const ModalSettings = ({ show }: { show: boolean }) => {
+type Props = {
+  onClick: () => void;
+  style: { zIndex: number; display: string };
+};
+
+export const ModalSettings = ({ onClick, style }: Props) => {
   const [inputValue, setInputValue] = useState('');
 
   const socket = io(publicRuntimeConfig.BACK);
@@ -111,31 +114,31 @@ const ModalSettings = ({ show }: { show: boolean }) => {
   };
 
   return (
-    <ModalMain style={{ zIndex: show ? 100 : -1, display: show ? 'flex' : 'none' }}>
-      <Span>Введите значение от -96.0 до 16.0 (оптимальные значения от -6 до 6)</Span>
-      <Input
-        onChange={e => setInputValue(e.target.value)}
-        value={inputValue}
-        type="text"
-        placeholder="Значение громкости"
-      />
-      <ButtonBlock
-        onClick={() => {
-          sendData();
-        }}
-      >
-        Сохранить
-      </ButtonBlock>
-      <ButtonBlock
-        onClick={() => {
-          testVolume();
-        }}
-      >
-        Тест
-      </ButtonBlock>
-      <SpanSpoiler>Для теста необходимо открыть свою ссылку, либо добавить её в ОБС</SpanSpoiler>
-    </ModalMain>
+    <ModalBackground onClick={onClick} style={style}>
+      <ModalMain style={style}>
+        <Span>Введите значение от -96.0 до 16.0 (оптимальные значения от -6 до 6)</Span>
+        <Input
+          onChange={e => setInputValue(e.target.value)}
+          value={inputValue}
+          type="text"
+          placeholder="Значение громкости"
+        />
+        <ButtonBlock
+          onClick={() => {
+            sendData();
+          }}
+        >
+          Сохранить
+        </ButtonBlock>
+        <ButtonBlock
+          onClick={() => {
+            testVolume();
+          }}
+        >
+          Тест
+        </ButtonBlock>
+        <SpanSpoiler>Для теста необходимо открыть свою ссылку, либо добавить её в ОБС</SpanSpoiler>
+      </ModalMain>
+    </ModalBackground>
   );
 };
-
-export default ModalSettings;

@@ -1,37 +1,24 @@
 import styled from 'styled-components';
+import { ReactNode } from 'react';
 
 const BaseLayout = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   width: 100%;
-  height: 100vh;
+  height: auto;
+  min-height: 100vh;
+  position: relative;
+  overflow: auto;
   background: #3b2c5e;
-  overflow: hidden;
 `;
 
-const ContentBlock = styled.div`
-  width: 100%;
-  align-self: center;
-  display: flex;
-  justify-content: center;
-  flex-direction: row;
-  flex-flow: row wrap;
-  height: fit-content;
+type Props = {
+  children: ReactNode;
+};
 
-  @media only screen and (max-width: 767px) {
-    flex-direction: column;
-    align-items: center;
-    height: fit-content;
-  }
-`;
-
-const Base = (props: any) => {
-  return (
-    <BaseLayout>
-      <ContentBlock>{props.children}</ContentBlock>
-    </BaseLayout>
-  );
+const Base = ({ children }: Props) => {
+  return <BaseLayout>{children}</BaseLayout>;
 };
 
 export default Base;
