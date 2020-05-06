@@ -3,10 +3,10 @@ import Base from '../layouts/Base';
 import getConfig from 'next/config';
 import axios from 'axios';
 import styled from 'styled-components';
-import { Button } from '../components/Button/Button';
-import { ModalInstruct } from '../components/Modals/modalInstruct';
-import { ModalSettings } from '../components/Modals/modalSettings';
-import { TermsOfUse } from '../components/TermsOfUse';
+import Button from '../components/Button/Button';
+import ModalInstruct from '../components/Modals/modalInstruct';
+import ModalSettings from '../components/Modals/modalSettings';
+import TermsOfUse from '../components/TermsOfUse';
 //@ts-ignore
 import { NotifyComponent, NotifyHandler } from 'react-notification-component';
 import copy from 'copy-to-clipboard';

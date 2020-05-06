@@ -30,8 +30,10 @@ const ButtonBlock = styled.div`
   }
 `;
 
-export const Button = ({ text, onClick, style }: Props) => (
+const Button = ({ text, onClick, style }: Props) => (
   <ButtonBlock onClick={onClick} style={style}>
     {text}
   </ButtonBlock>
 );
+
+export default Button;

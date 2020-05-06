@@ -91,7 +91,7 @@ type Props = {
   style: { zIndex: number; display: string };
 };
 
-export const ModalSettings = ({ onClick, style }: Props) => {
+const ModalSettings = ({ onClick, style }: Props) => {
   const [inputValue, setInputValue] = useState('');
 
   const socket = io(publicRuntimeConfig.BACK);
@@ -142,3 +142,5 @@ export const ModalSettings = ({ onClick, style }: Props) => {
     </ModalBackground>
   );
 };
+
+export default ModalSettings;

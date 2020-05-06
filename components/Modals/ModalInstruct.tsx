@@ -36,7 +36,7 @@ type Props = {
   style: { zIndex: number; display: string };
 };
 
-export const ModalInstruct = ({ onClick, style }: Props) => {
+const ModalInstruct = ({ onClick, style }: Props) => {
   return (
     <ModalBackground onClick={onClick} style={style}>
       <ModalMain className="modal" style={style}>
@@ -122,3 +122,5 @@ export const ModalInstruct = ({ onClick, style }: Props) => {
     </ModalBackground>
   );
 };
+
+export default ModalInstruct;
