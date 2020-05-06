@@ -23,7 +23,7 @@ import { getPassport } from './passport';
 import { getApi } from './getApi';
 import { checkSubscriptionEnd } from './checkSubscriptionEnd';
 import { chatBot } from '../twitch/chat-bot';
-// import { tgBot } from '../telegram/tgBot';
+import { tgBot } from '../telegram/tgBot';
 
 require('dotenv').config();
 
@@ -44,7 +44,7 @@ app
 
     getApi(server, passport, io);
     chatBot();
-    // tgBot();
+    tgBot();
 
     event.on('play', play({ io }));
     event.on('skip', skipHandler({ io }));
