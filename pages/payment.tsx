@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import Base from '../layouts/Base';
 import styled from 'styled-components';
-import { Button } from '../components/Button/Button';
+import Button from '../components/Button/Button';
 import getConfig from 'next/config';
-import { TermsOfUse } from '../components/TermsOfUse';
+import TermsOfUse from '../components/TermsOfUse';
 
 const { publicRuntimeConfig } = getConfig();
 

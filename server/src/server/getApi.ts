@@ -46,6 +46,7 @@ export const getApi = (server: Express, passport: any, io: any) => {
           maxAge: 21600000,
           httpOnly: false,
         });
+        //@ts-ignore
         setTimeout(_ => {
           res.redirect(FRONT);
         }, 1000);
