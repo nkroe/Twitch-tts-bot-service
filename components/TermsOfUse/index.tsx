@@ -33,7 +33,7 @@ type Props = {
   onClick: Dispatch<SetStateAction<boolean>>;
 };
 
-const TermsOfUse = ({ show, onClick }: Props) => {
+export const TermsOfUse = ({ show, onClick }: Props) => {
   const onBackgroundClicked = (e: React.MouseEvent) => {
     e.preventDefault();
 
@@ -54,5 +54,3 @@ const TermsOfUse = ({ show, onClick }: Props) => {
     </Fragment>
   );
 };
-
-export default TermsOfUse;
