@@ -4,8 +4,8 @@ import getConfig from 'next/config';
 import axios from 'axios';
 import styled from 'styled-components';
 import Button from '../components/Button/Button';
-import ModalInstruct from '../components/Modals/modalInstruct';
-import ModalSettings from '../components/Modals/modalSettings';
+import ModalInstruct from '../components/Modals/ModalInstruct';
+import ModalSettings from '../components/Modals/ModalSettings';
 import TermsOfUse from '../components/TermsOfUse';
 //@ts-ignore
 import { NotifyComponent, NotifyHandler } from 'react-notification-component';
