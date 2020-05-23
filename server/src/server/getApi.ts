@@ -222,6 +222,15 @@ export const getApi = (server: Express, passport: any, io: any) => {
     res.redirect(`${FRONT}`);
   });
 
+  server.get('/sitemap.xml', (_, res) =>
+    res.status(200).sendFile('sitemap.xml', {
+      root: './static/',
+      headers: {
+        'Content-Type': 'text/xml;charset=UTF-8',
+      },
+    })
+  );
+
   server.get('*', (req: any, res: any) => {
     return handle(req, res);
   });
