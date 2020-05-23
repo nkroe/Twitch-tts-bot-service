@@ -1,6 +1,7 @@
 import App from 'next/app';
-import Head from 'next/head';
 import React from 'react';
+import { DefaultSeo } from 'next-seo';
+import SEO from '../next-seo.config';
 
 export default class MyApp extends App {
   //@ts-ignore
@@ -19,9 +20,7 @@ export default class MyApp extends App {
 
     return (
       <>
-        <Head>
-          <title>FAKEBOT</title>
-        </Head>
+        <DefaultSeo {...SEO} />
         <Component {...pageProps} />
       </>
     );
