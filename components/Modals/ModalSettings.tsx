@@ -26,6 +26,7 @@ const ModalMain = styled.div`
   font-family: 'Roboto', sans-serif;
   color: #fff;
   border-radius: 5px;
+  cursor: auto;
 
   @media only screen and (max-width: 767px) {
     width: auto;

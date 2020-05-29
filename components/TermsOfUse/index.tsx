@@ -35,8 +35,6 @@ type Props = {
 
 export const TermsOfUse = ({ show, onClick }: Props) => {
   const onBackgroundClicked = (e: React.MouseEvent) => {
-    e.preventDefault();
-
     if (e.target !== e.currentTarget) return;
 
     onClick(false);

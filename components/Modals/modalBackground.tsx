@@ -21,8 +21,6 @@ type Props = {
 
 export const ModalBackground = ({ onClick, style, children }: Props) => {
   const onBackgroundClicked = (e: MouseEvent) => {
-    e.preventDefault();
-
     if (e.target !== e.currentTarget) return;
 
     onClick(false);
