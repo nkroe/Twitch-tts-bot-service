@@ -25,6 +25,7 @@ import { checkSubscriptionEnd } from './checkSubscriptionEnd';
 import { chatBot } from '../twitch/chat-bot';
 import { tgBot } from '../telegram/tgBot';
 import { startStream } from './startStream';
+import { ChildProcessWithoutNullStreams } from 'child_process';
 
 require('dotenv').config();
 
@@ -32,7 +33,7 @@ const PORT = process.env.PORT || 8080;
 
 const passport = getPassport();
 
-let stream = null;
+let stream: ChildProcessWithoutNullStreams | null = null;
 
 startDb();
 startUpdateStats();
