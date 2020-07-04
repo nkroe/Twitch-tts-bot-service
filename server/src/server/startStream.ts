@@ -25,7 +25,7 @@ export const startStream = () =>
     '-pix_fmt',
     'yuv420p',
     '-preset',
-    'slow',
+    'ultrafast',
     '-g',
     '30',
     `rtmp://live-hel.twitch.tv/app/${STREAM_KEY}`,
