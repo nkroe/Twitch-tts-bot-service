@@ -24,16 +24,12 @@ import { getApi } from './getApi';
 import { checkSubscriptionEnd } from './checkSubscriptionEnd';
 import { chatBot } from '../twitch/chat-bot';
 import { tgBot } from '../telegram/tgBot';
-import { startStream } from './startStream';
-import { ChildProcessWithoutNullStreams } from 'child_process';
 
 require('dotenv').config();
 
 const PORT = process.env.PORT || 8080;
 
 const passport = getPassport();
-
-let stream: ChildProcessWithoutNullStreams | null = null;
 
 startDb();
 startUpdateStats();
@@ -49,20 +45,6 @@ app
     getApi(server, passport, io);
     chatBot();
     tgBot();
-
-    setInterval(() => {
-      try {
-        if (stream) {
-          stream.kill();
-
-          stream = null;
-        }
-
-        stream = startStream();
-      } catch (e) {
-        console.log(e);
-      }
-    }, 1000 * 60 * 10);
 
     event.on('play', play({ io }));
     event.on('skip', skipHandler({ io }));
