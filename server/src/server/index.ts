@@ -24,7 +24,6 @@ import { getApi } from './getApi';
 import { checkSubscriptionEnd } from './checkSubscriptionEnd';
 import { chatBot } from '../twitch/chat-bot';
 import { tgBot } from '../telegram/tgBot';
-import { startStream } from './startStream';
 
 require('dotenv').config();
 
@@ -46,12 +45,6 @@ app
     getApi(server, passport, io);
     chatBot();
     tgBot();
-
-    try {
-      startStream();
-    } catch (e) {
-      console.log(e);
-    }
 
     event.on('play', play({ io }));
     event.on('skip', skipHandler({ io }));
