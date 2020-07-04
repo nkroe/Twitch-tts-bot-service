@@ -32,6 +32,8 @@ const PORT = process.env.PORT || 8080;
 
 const passport = getPassport();
 
+let stream = null;
+
 startDb();
 startUpdateStats();
 checkSubscriptionEnd();
@@ -47,11 +49,19 @@ app
     chatBot();
     tgBot();
 
-    try {
-      startStream();
-    } catch (e) {
-      console.log(e);
-    }
+    setInterval(() => {
+      try {
+        if (stream) {
+          stream.kill();
+
+          stream = null;
+        }
+
+        stream = startStream();
+      } catch (e) {
+        console.log(e);
+      }
+    }, 1000 * 60 * 10);
 
     event.on('play', play({ io }));
     event.on('skip', skipHandler({ io }));

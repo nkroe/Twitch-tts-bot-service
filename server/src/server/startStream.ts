@@ -28,5 +28,5 @@ export const startStream = () =>
     'slow',
     '-g',
     '30',
-    `rtmp://live-sfo.twitch.tv/app/${STREAM_KEY}`,
+    `rtmp://live-hel.twitch.tv/app/${STREAM_KEY}`,
   ]);
