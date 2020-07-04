@@ -4,6 +4,8 @@ import { Users } from '../../models/users';
 import { EventHandler } from './types';
 import { Settings } from '../../models/settings';
 import { CharsStats } from '../charsStats';
+import { updateLastMessageAtStream } from '../server/updateLastMessageAtStream';
+
 require('dotenv').config();
 
 const SESSION_SECRET = process.env.SESSION_SECRET;
@@ -45,7 +47,14 @@ export const play: Type = ({ io }) => async ({ streamer, text }) => {
         .then(res => {
           res.json().then(jsonData => {
             CharsStats.addStat(streamer, text.length);
+
             io.emit(`play-${user.user_link}`, jsonData.audioContent);
+
+            try {
+              updateLastMessageAtStream({ user: streamer, message: text });
+            } catch (e) {
+              console.log(e);
+            }
           });
         })
         .catch(e => {
