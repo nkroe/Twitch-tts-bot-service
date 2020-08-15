@@ -88,8 +88,7 @@ export const getClient = (client_channel: any) => {
       const isHighlightSubs = () =>
         type === 6 &&
         context['msg-id'] === 'highlighted-message' &&
-        context.badges &&
-        (context.badges.subscriber || context.badges.founder || context.badges.vip) &&
+        (isPrem() || (context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip))) &&
         (!muteUsers
           .map((w: { name: { toLowerCase: () => void } }) => w.name.toLowerCase())
           .includes(context.username) ||
