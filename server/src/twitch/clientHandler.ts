@@ -85,6 +85,15 @@ export const getClient = (client_channel: any) => {
           .map((w: { name: { toLowerCase: () => void } }) => w.name.toLowerCase())
           .includes(context.username) ||
           isPrem());
+      const isHighlightSubs = () =>
+        type === 6 &&
+        context['msg-id'] === 'highlighted-message' &&
+        context.badges &&
+        (context.badges.subscriber || context.badges.founder || context.badges.vip) &&
+        (!muteUsers
+          .map((w: { name: { toLowerCase: () => void } }) => w.name.toLowerCase())
+          .includes(context.username) ||
+          isPrem());
       const premMode = () =>
         type === 5 &&
         (premUsers.map((w: { name: any }) => w.name).includes(context.username.toLowerCase()) ||
@@ -92,7 +101,10 @@ export const getClient = (client_channel: any) => {
 
       const user = users.find((w: { name: any }) => w.name === context.username);
 
-      if (isHighlight()) {
+      if (isHighlightSubs()) {
+        const t = msg.replace(regWords, '');
+        emitPlay(t, target);
+      } else if (isHighlight()) {
         const t = msg.replace(regWords, '');
         emitPlay(t, target);
       } else if (/^!fake /gi.test(msg) && type !== 4) {
@@ -144,6 +156,8 @@ export const getClient = (client_channel: any) => {
           updateType(3, 'випы и выше', client, target, context);
         } else if (/^!fakemsg$/gi.test(msg)) {
           updateType(4, 'выделенные сообщения', client, target, context);
+        } else if (/^!fakemsgsub$/gi.test(msg)) {
+          updateType(6, 'выделенные сообщения для сабов и выше', client, target, context);
         } else if (/^!fakeprem$/gi.test(msg)) {
           updateType(5, 'премиум пользователи', client, target, context);
         } else if (/^!skip$/gi.test(msg)) {
