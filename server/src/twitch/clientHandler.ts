@@ -75,7 +75,8 @@ export const getClient = (client_channel: any) => {
 
       if (chan !== target.slice(1)) return;
 
-      const isSub = () => context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip);
+      const isSub = () =>
+        type === 2 && context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip);
       const isVip = () => type === 3 && context.badges && context.badges.vip;
       const isHighlight = () =>
         type === 4 &&
@@ -87,6 +88,8 @@ export const getClient = (client_channel: any) => {
       const isHighlightSubs = () =>
         type === 6 &&
         context['msg-id'] === 'highlighted-message' &&
+        context.badges &&
+        (context.badges.subscriber || context.badges.founder || context.badges.vip) &&
         (!muteUsers
           .map((w: { name: { toLowerCase: () => void } }) => w.name.toLowerCase())
           .includes(context.username) ||
@@ -99,14 +102,12 @@ export const getClient = (client_channel: any) => {
       const user = users.find((w: { name: any }) => w.name === context.username);
 
       if (isHighlightSubs()) {
-        if (isSub()) {
-          const t = msg.replace(regWords, '');
-          emitPlay(t, target);
-        }
+        const t = msg.replace(regWords, '');
+        emitPlay(t, target);
       } else if (isHighlight()) {
         const t = msg.replace(regWords, '');
         emitPlay(t, target);
-      } else if (/^!fake /gi.test(msg) && type !== 4) {
+      } else if (/^!fake /gi.test(msg) && type !== 4 && type !== 6) {
         if (isPrem()) {
           if (context.username === creator) {
             emitPlay(text, target);
@@ -133,7 +134,7 @@ export const getClient = (client_channel: any) => {
                   : 30))
           ) {
             return;
-          } else if (isSub() && type === 2) {
+          } else if (isSub()) {
             updateUsers(user, text, target, context);
           } else if (isVip()) {
             updateUsers(user, text, target, context);
