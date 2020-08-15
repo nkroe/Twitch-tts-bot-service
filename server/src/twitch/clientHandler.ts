@@ -75,8 +75,7 @@ export const getClient = (client_channel: any) => {
 
       if (chan !== target.slice(1)) return;
 
-      const isSub = () =>
-        type === 2 && context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip);
+      const isSub = () => context.badges && (context.badges.subscriber || context.badges.founder || context.badges.vip);
       const isVip = () => type === 3 && context.badges && context.badges.vip;
       const isHighlight = () =>
         type === 4 &&
@@ -88,8 +87,6 @@ export const getClient = (client_channel: any) => {
       const isHighlightSubs = () =>
         type === 6 &&
         context['msg-id'] === 'highlighted-message' &&
-        context.badges &&
-        (context.badges.subscriber || context.badges.founder || context.badges.vip) &&
         (!muteUsers
           .map((w: { name: { toLowerCase: () => void } }) => w.name.toLowerCase())
           .includes(context.username) ||
@@ -102,8 +99,10 @@ export const getClient = (client_channel: any) => {
       const user = users.find((w: { name: any }) => w.name === context.username);
 
       if (isHighlightSubs()) {
-        const t = msg.replace(regWords, '');
-        emitPlay(t, target);
+        if (isSub()) {
+          const t = msg.replace(regWords, '');
+          emitPlay(t, target);
+        }
       } else if (isHighlight()) {
         const t = msg.replace(regWords, '');
         emitPlay(t, target);
@@ -134,7 +133,7 @@ export const getClient = (client_channel: any) => {
                   : 30))
           ) {
             return;
-          } else if (isSub()) {
+          } else if (isSub() && type === 2) {
             updateUsers(user, text, target, context);
           } else if (isVip()) {
             updateUsers(user, text, target, context);
